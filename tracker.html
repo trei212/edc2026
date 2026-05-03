@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>EDC Las Vegas 2026 — Set Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+/* ============================================
+   EDC LV 2026 — Modern Dark Neon System
+   ============================================ */
+:root {
+  --bg: #08080f;
+  --bg-2: #0f0f1a;
+  --bg-3: #161624;
+  --bg-4: #1e1e2f;
+  --line: rgba(255,255,255,0.05);
+  --line-medium: rgba(255,255,255,0.10);
+  --line-strong: rgba(255,255,255,0.18);
+  --text: #f0f0f5;
+  --text-dim: #9ca3af;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --col-width: 132px;
+  --time-col-width: 56px;
+  --hour-height: 96px;
+  --header-height: 64px;
+  --stage-color: #ff2a6d;
+  /* Stage colours needed in CSS */
+  --wasteland: #ff003c;
+  --casa: #ffd60a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* ── Header ── */
+header {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Controls Bar ── */
+.controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 18px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  z-index: 99;
+}
+
+.day-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.day-tab {
+  padding: 7px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.day-tab .day-num {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 2px;
+}
+.day-tab.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+.day-tab.active .day-num { color: var(--bg); }
+.day-tab:hover:not(.active) {
+  border-color: var(--line-strong);
+  color: var(--text-dim);
+}
+
+.view-toggle, .export-btn, .reset-btn {
+  padding: 7px 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  line-height: 1.2;
+}
+.view-toggle:hover, .export-btn:hover {
+  border-color: var(--line-strong);
+  color: var(--text-dim);
+}
+.view-toggle.active {
+  background: color-mix(in srgb, var(--wasteland) 15%, var(--bg-3));
+  border-color: var(--wasteland);
+  color: var(--wasteland);
+}
+
+.reset-btn:hover {
+  border-color: var(--wasteland);
+  color: var(--wasteland);
+  background: color-mix(in srgb, var(--wasteland) 8%, transparent);
+}
+
+.search-box {
+  flex: 1;
+  min-width: 140px;
+  max-width: 220px;
+  position: relative;
+}
+.search-box input {
+  width: 100%;
+  padding: 7px 10px 7px 28px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  outline: none;
+}
+.search-box input::placeholder { color: var(--text-faint); }
+.search-box input:focus { border-color: var(--line-strong); }
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+/* ── Stage Info / Summary ── */
+.stage-info {
+  padding: 8px 18px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 98;
+}
+.stage-info .counter-num { color: #fff; font-weight: 700; }
+
+.tier-summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.tier-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 3px;
+}
+
+/* ── Conflict Banner ── */
+.conflict-banner {
+  padding: 8px 18px;
+  background: color-mix(in srgb, var(--wasteland) 12%, var(--bg-2));
+  border-bottom: 1px solid color-mix(in srgb, var(--wasteland) 30%, transparent);
+  color: var(--wasteland);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.conflict-banner.show { display: flex; }
+.conflict-banner .warning-icon { font-size: 12px; }
+
+/* ── TBA Banner ── */
+.tba-banner {
+  padding: 8px 18px;
+  background: color-mix(in srgb, var(--casa) 10%, var(--bg-2));
+  border-bottom: 1px solid color-mix(in srgb, var(--casa) 25%, transparent);
+  color: var(--casa);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+.tba-banner.show { display: flex; }
+
+/* ── Grid ── */
+.grid-wrap {
+  overflow: auto;
+  height: calc(100vh - 210px);
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: var(--time-col-width) repeat(14, var(--col-width));
+  width: max-content;
+}
+
+.corner {
+  position: sticky;
+  top: 0; left: 0;
+  z-index: 8;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  height: var(--header-height);
+}
+
+.stage-header {
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 6;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+.stage-header .name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: var(--stage-color);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--stage-color) 30%, transparent);
+}
+
+.time-col {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-right: 1px solid var(--line-strong);
+}
+
+.time-marker {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 3px 6px 0 0;
+  text-align: right;
+  border-top: 1px solid var(--line-medium);
+  letter-spacing: 0;
+}
+.time-marker.first { border-top: none; }
+
+.stage-col {
+  position: relative;
+  border-right: 1px solid var(--line);
+  background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 100% var(--hour-height);
+}
+
+/* ── Set Blocks ── */
+.set {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 6px;
+  padding: 6px 7px 5px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--stage-color) 6%, var(--bg));
+  border: 1px solid transparent;
+  z-index: 2;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.set:hover {
+  transform: translateY(-1px) scale(1.01);
+  z-index: 4;
+}
+.set:active { transform: scale(0.98); }
+
+.set .artist {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  color: #909090;
+  line-height: 1.15;
+  margin-bottom: 3px;
+  letter-spacing: -0.01em;
+  transition: color 0.18s ease;
+}
+.set .time {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  color: #606060;
+  opacity: 1;
+  letter-spacing: 0;
+}
+.set .genre {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: #505050;
+  opacity: 1;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Tier: MAYBE */
+.set.tier-maybe {
+  background: color-mix(in srgb, var(--stage-color) 30%, var(--bg));
+  border-color: color-mix(in srgb, var(--stage-color) 40%, transparent);
+}
+.set.tier-maybe .artist {
+  color: color-mix(in srgb, var(--stage-color) 70%, var(--text-dim));
+}
+.set.tier-maybe .time {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+.set.tier-maybe::after {
+  content: '?';
+  position: absolute;
+  top: 4px;
+  right: 7px;
+  font-size: 11px;
+  color: var(--stage-color);
+  opacity: 0.6;
+}
+
+/* Tier: WANT */
+.set.tier-want {
+  background: color-mix(in srgb, var(--stage-color) 65%, var(--bg));
+  border-color: color-mix(in srgb, var(--stage-color) 70%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--stage-color) 25%, transparent),
+              0 0 16px color-mix(in srgb, var(--stage-color) 10%, transparent);
+}
+.set.tier-want .artist {
+  color: var(--text);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--stage-color) 40%, transparent);
+}
+.set.tier-want .time {
+  color: var(--text-dim);
+}
+.set.tier-want::after {
+  content: '★';
+  position: absolute;
+  top: 4px;
+  right: 7px;
+  font-size: 10px;
+  color: var(--stage-color);
+}
+
+/* Tier: MUST */
+.set.tier-must {
+  background: var(--stage-color);
+  border-color: var(--stage-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--stage-color) 60%, transparent),
+              0 0 25px color-mix(in srgb, var(--stage-color) 30%, transparent),
+              0 0 45px color-mix(in srgb, var(--stage-color) 15%, transparent),
+              inset 0 0 12px rgba(255,255,255,0.15);
+  z-index: 3;
+}
+.set.tier-must .artist {
+  color: #08080f;
+  font-weight: 900;
+  text-shadow: none;
+}
+.set.tier-must .time {
+  color: rgba(8,8,15,0.55);
+}
+.set.tier-must .genre {
+  color: rgba(8,8,15,0.4);
+}
+.set.tier-must::after {
+  content: '♥';
+  position: absolute;
+  top: 3px;
+  right: 6px;
+  font-size: 11px;
+  color: rgba(8,8,15,0.8);
+}
+
+/* Conflict warning on MUST sets */
+.set.tier-must.conflict {
+  border-color: var(--wasteland);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--wasteland) 60%, transparent),
+              0 0 25px color-mix(in srgb, var(--wasteland) 30%, transparent),
+              inset 0 0 12px rgba(255,255,255,0.15);
+  animation: pulseConflict 2s ease-in-out infinite;
+}
+@keyframes pulseConflict {
+  0%, 100% { box-shadow: 0 0 10px color-mix(in srgb, var(--wasteland) 60%, transparent), 0 0 25px color-mix(in srgb, var(--wasteland) 30%, transparent), inset 0 0 12px rgba(255,255,255,0.15); }
+  50% { box-shadow: 0 0 15px color-mix(in srgb, var(--wasteland) 80%, transparent), 0 0 35px color-mix(in srgb, var(--wasteland) 50%, transparent), inset 0 0 12px rgba(255,255,255,0.15); }
+}
+
+/* Hidden in "my schedule only" view */
+.my-schedule .set.tier-off { opacity: 0.06; pointer-events: none; }
+.my-schedule .set.tier-maybe { opacity: 0.18; }
+.my-schedule .set.tier-want { opacity: 0.7; }
+
+/* Note indicator dot */
+.note-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+  margin-left: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+/* Search highlight */
+.set.search-match {
+  border-color: var(--text) !important;
+  box-shadow: 0 0 8px rgba(255,255,255,0.2);
+}
+.set.search-hide { opacity: 0.08; }
+
+/* ── Now Line ── */
+.now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.9);
+  z-index: 6;
+  pointer-events: none;
+}
+.now-line::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+}
+.now-label {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 9px;
+  color: #fff;
+  text-align: right;
+  padding-right: 6px;
+  top: -11px;
+  letter-spacing: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Travel Panel ── */
+.travel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 300;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.travel-overlay.show { display: flex; }
+.travel-panel {
+  background: var(--bg-2);
+  border: 1px solid var(--line-medium);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 20px 32px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 70vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.travel-panel h2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+.travel-panel .panel-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.travel-close {
+  float: right;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  margin-top: -2px;
+}
+.travel-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.travel-item:first-of-type { border-top: none; }
+.travel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.travel-info { flex: 1; min-width: 0; }
+.travel-artist {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.travel-meta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.travel-walk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  margin: 4px 0 4px 22px;
+  background: var(--bg-3);
+  border-radius: 999px;
+  width: fit-content;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.travel-walk.tight { color: var(--casa); }
+.travel-walk.conflict { color: var(--wasteland); }
+.travel-empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+}
+
+/* ── Mobile improvements ── */
+@media (max-width: 600px) {
+  :root { --col-width: 116px; }
+  .title { font-size: 17px; }
+  .controls {
+    padding: 6px 12px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .day-tabs { order: 0; width: 100%; }
+  .search-box { order: 1; flex: 1; max-width: none; min-width: 0; }
+  .view-toggle { order: 2; }
+  .export-btn { order: 3; }
+  .route-btn { order: 4; }
+  .reset-btn { order: 5; }
+  .grid-wrap { height: calc(100vh - 230px); }
+  .set { padding: 7px 8px 6px; }
+  .set .artist { font-size: 11.5px; }
+}
+@media (max-width: 400px) {
+  :root { --col-width: 100px; }
+  .day-tab { padding: 6px 10px; }
+}
+.scroll-hint {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 50;
+  animation: hintFade 4s ease-in-out 1s forwards;
+}
+@keyframes hintFade {
+  to { opacity: 0; transform: translateY(8px); }
+}
+
+/* ── Export Menu ── */
+.export-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-3);
+  border: 1px solid var(--line-medium);
+  border-radius: 8px;
+  padding: 4px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  z-index: 200;
+}
+.export-menu.show { display: flex; }
+.export-menu button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.export-menu button:hover {
+  background: var(--bg-4);
+  color: var(--text);
+}
+
+/* ── Note Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg-3);
+  border: 1px solid var(--line-medium);
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 360px;
+}
+.modal h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.modal textarea {
+  width: 100%;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+}
+.modal textarea:focus { border-color: var(--line-strong); }
+.modal-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.modal-buttons button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--text-dim);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.modal-buttons button.primary {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.modal-buttons button:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  :root { --col-width: 116px; }
+  .title { font-size: 17px; }
+  .controls {
+    padding: 6px 12px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .day-tabs { order: 0; width: 100%; }
+  .search-box { order: 1; flex: 1; max-width: none; min-width: 0; }
+  .view-toggle { order: 2; }
+  .export-btn { order: 3; }
+  .reset-btn { order: 4; }
+  .grid-wrap { height: calc(100vh - 230px); }
+}
+
+@media (max-width: 400px) {
+  :root { --col-width: 100px; }
+  .day-tab { padding: 6px 10px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">EDC Las Vegas 2026</div>
+  <div class="subtitle">Las Vegas Motor Speedway · May 15–17 · Set Tracker</div>
+</header>
+
+<div class="controls">
+  <div class="day-tabs">
+    <div class="day-tab active" data-day="1">
+      <span class="day-num">DAY 1</span>
+      Fri May 15
+    </div>
+    <div class="day-tab" data-day="2">
+      <span class="day-num">DAY 2</span>
+      Sat May 16
+    </div>
+    <div class="day-tab" data-day="3">
+      <span class="day-num">DAY 3</span>
+      Sun May 17
+    </div>
+  </div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search artist..." autocomplete="off">
+  </div>
+  <button class="view-toggle" id="viewToggle">My Schedule</button>
+  <button class="view-toggle route-btn" id="routeBtn">🗺 Route</button>
+  <div style="position:relative;">
+    <button class="export-btn" id="exportBtn">Export ▾</button>
+    <div class="export-menu" id="exportMenu">
+      <button onclick="exportPNG(true)">📸 PNG (full grid)</button>
+      <button onclick="exportPNG(false)">📸 PNG (my picks only)</button>
+      <button onclick="exportICS()">📅 Calendar (.ics)</button>
+      <button onclick="copyShareURL()">🔗 Copy share link</button>
+    </div>
+  </div>
+  <button class="reset-btn" id="resetBtn">Clear</button>
+</div>
+
+<div class="stage-info">
+  <span id="stageInfoLeft">Day 1 · <span class="counter-num" id="setCount">0</span> sets · <span id="tierSummary" class="tier-summary"></span></span>
+  <span style="font-size:9px;color:var(--text-faint);">Tap cycles: off → maybe → want → must → off · Long-press for notes</span>
+</div>
+
+<div class="conflict-banner" id="conflictBanner">
+  <span class="warning-icon">⚠️</span>
+  <span id="conflictText"></span>
+</div>
+
+<div class="tba-banner" id="tbaBanner">
+  <span>⏰</span>
+  <span>Day 2/3 set times are estimates — verify against the official Insomniac app</span>
+</div>
+
+<div class="grid-wrap" id="gridWrap">
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="scroll-hint">⇆ Scroll to see all 14 stages</div>
+
+<!-- Note Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add Note</h3>
+    <textarea id="modalNote" placeholder="Meet at front left, bring water, etc..."></textarea>
+    <div class="modal-buttons">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveModalNote()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Travel Panel -->
+<div class="travel-overlay" id="travelOverlay">
+  <div class="travel-panel" id="travelPanel">
+    <button class="travel-close" onclick="document.getElementById('travelOverlay').classList.remove('show')">✕</button>
+    <h2>Your Route</h2>
+    <div class="panel-sub" id="travelSub">Day 1 picks in time order</div>
+    <div id="travelContent"></div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// STAGE CONFIG
+// ============================================
+const STAGES = [
+  { id: 'kinetic',     name: 'Kinetic Field',     color: '#ff2a6d', genre: 'mainstage' },
+  { id: 'circuit',     name: 'Circuit Grounds',   color: '#00d9ff', genre: 'bass/dubstep' },
+  { id: 'cosmic',      name: 'Cosmic Meadow',     color: '#00f5d4', genre: 'house/bass' },
+  { id: 'basspod',     name: 'Basspod',           color: '#ff6b35', genre: 'dubstep/dnb' },
+  { id: 'neon-garden', name: 'Neon Garden',       color: '#c77dff', genre: 'techno/deep' },
+  { id: 'quantum',     name: 'Quantum Valley',    color: '#b5179e', genre: 'trance' },
+  { id: 'wasteland',   name: 'Wasteland',         color: '#ff003c', genre: 'hardstyle' },
+  { id: 'stereobloom', name: 'Stereobloom',       color: '#ccff00', genre: 'house/tech' },
+  { id: 'bionic',      name: 'Bionic Jungle',     color: '#72efdd', genre: 'house' },
+  { id: 'casa',        name: 'Casa Bacardi',      color: '#ffd60a', genre: 'latin/house' },
+  { id: 'forest',      name: 'Forest House',      color: '#38b000', genre: 'house' },
+  { id: 'yeedc',       name: 'YeeDC',             color: '#ff9e00', genre: 'bass' },
+  { id: 'beatbox',     name: 'Beatbox Art Car',   color: '#4cc9f0', genre: 'varied' },
+  { id: 'insomniac',   name: 'Insomniac Fridays', color: '#9d4edd', genre: 'varied' },
+];
+
+const TIERS = ['off', 'maybe', 'want', 'must'];
+const TIER_ICONS = { off: '', maybe: '?', want: '★', must: '♥' };
+
+// ============================================
+// DAY CONFIG
+// ============================================
+const DAY_CONFIG = {
+  1: { start: '5:00pm', startMin: 17*60, endMin: (5+24)*60 + 30, label: 'Fri May 15', pxPerMin: 1.6 },
+  2: { start: '7:00pm', startMin: 19*60, endMin: (5+24)*60 + 30, label: 'Sat May 16', pxPerMin: 1.6 },
+  3: { start: '7:00pm', startMin: 19*60, endMin: (5+24)*60 + 30, label: 'Sun May 17', pxPerMin: 1.6 },
+};
+
+// ============================================
+// ============================================
+// LINEUP DATA — verified against Festival Dust (May 2026)
+// ============================================
+const LINEUP = {
+  1: [
+    // Kinetic Field
+    { stage:'kinetic', artist:'LAIDBACK LUKE B2B CHUCKIE', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'kinetic', artist:'KOROLOVA', start:'8:00pm', end:'9:00pm', genre:'trance' },
+    { stage:'kinetic', artist:'ARGY', start:'9:00pm', end:'10:00pm', genre:'techno' },
+    { stage:'kinetic', artist:'CHRIS LORENZO', start:'10:07pm', end:'11:15pm', genre:'house/bass' },
+    { stage:'kinetic', artist:'SOFI TUKKER', start:'11:19pm', end:'12:30am', genre:'electro-pop' },
+    { stage:'kinetic', artist:'THE CHAINSMOKERS', start:'12:32am', end:'1:42am', genre:'mainstage' },
+    { stage:'kinetic', artist:'FISHER', start:'1:47am', end:'2:57am', genre:'tech-house' },
+    { stage:'kinetic', artist:'PORTER ROBINSON', start:'3:01am', end:'4:11am', genre:'electro' },
+    { stage:'kinetic', artist:'CHARLOTTE DE WITTE', start:'4:14am', end:'5:29am', genre:'techno' },
+    // Circuit Grounds
+    { stage:'circuit', artist:'1991', start:'7:00pm', end:'8:00pm', genre:'dnb' },
+    { stage:'circuit', artist:'BOU', start:'8:00pm', end:'9:00pm', genre:'dnb' },
+    { stage:'circuit', artist:'NICO MORENO', start:'9:00pm', end:'10:00pm', genre:'hard-techno' },
+    { stage:'circuit', artist:'I HATE MODELS', start:'10:00pm', end:'11:15pm', genre:'techno' },
+    { stage:'circuit', artist:'LEVITY', start:'11:15pm', end:'12:25am', genre:'bass' },
+    { stage:'circuit', artist:'WOOLI', start:'12:25am', end:'1:35am', genre:'dubstep' },
+    { stage:'circuit', artist:'THE OUTLAW', start:'1:35am', end:'2:35am', genre:'dubstep' },
+    { stage:'circuit', artist:'HOLY PRIEST', start:'2:35am', end:'3:30am', genre:'dubstep' },
+    { stage:'circuit', artist:'RAY VOLPE', start:'3:30am', end:'4:30am', genre:'dubstep' },
+    { stage:'circuit', artist:'LEVEL UP', start:'4:30am', end:'5:30am', genre:'dubstep' },
+    // Cosmic Meadow
+    { stage:'cosmic', artist:'MAX DEAN B2B LUKE DEAN', start:'5:00pm', end:'6:50pm', genre:'house' },
+    { stage:'cosmic', artist:'JACKIE HOLLANDER', start:'7:00pm', end:'7:55pm', genre:'house' },
+    { stage:'cosmic', artist:'RODDY LIMA', start:'7:55pm', end:'8:55pm', genre:'house' },
+    { stage:'cosmic', artist:'WESTEND', start:'8:55pm', end:'9:55pm', genre:'house' },
+    { stage:'cosmic', artist:'WALKER & ROYCE B2B VNSSA', start:'9:55pm', end:'10:55pm', genre:'house' },
+    { stage:'cosmic', artist:'UNDERWORLD', start:'11:10pm', end:'12:10am', genre:'electro' },
+    { stage:'cosmic', artist:'MEDUZA', start:'12:25am', end:'1:45am', genre:'house' },
+    { stage:'cosmic', artist:'NOTION', start:'1:47am', end:'2:47am', genre:'bass-house' },
+    { stage:'cosmic', artist:'MPH', start:'2:47am', end:'4:02am', genre:'bass-house' },
+    { stage:'cosmic', artist:'SAN PACHO', start:'4:02am', end:'5:30am', genre:'house' },
+    // Basspod
+    { stage:'basspod', artist:'RIOT', start:'7:00pm', end:'7:50pm', genre:'dubstep' },
+    { stage:'basspod', artist:'HEYZ', start:'7:50pm', end:'8:40pm', genre:'dubstep' },
+    { stage:'basspod', artist:'MUZZ', start:'8:40pm', end:'9:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'GORILLAT', start:'9:30pm', end:'10:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'GHENGAR', start:'10:30pm', end:'11:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'DEATHPACT', start:'11:30pm', end:'12:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'ATLIENS', start:'12:30am', end:'1:30am', genre:'bass' },
+    { stage:'basspod', artist:'KAI WACHI', start:'1:30am', end:'2:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'ADVENTURE CLUB', start:'2:30am', end:'3:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'CULTURE SHOCK', start:'3:30am', end:'4:30am', genre:'dnb' },
+    { stage:'basspod', artist:'CYCLOPS', start:'4:30am', end:'5:30am', genre:'dubstep' },
+    // Neon Garden
+    { stage:'neon-garden', artist:'ANASTAZJA', start:'7:00pm', end:'8:30pm', genre:'techno' },
+    { stage:'neon-garden', artist:'MESTIZA', start:'8:30pm', end:'10:00pm', genre:'techno' },
+    { stage:'neon-garden', artist:'DJ TENNIS B2B CHLOE CAILLET', start:'10:00pm', end:'11:30pm', genre:'house' },
+    { stage:'neon-garden', artist:'PEGGY GOU', start:'11:30pm', end:'1:00am', genre:'house' },
+    { stage:'neon-garden', artist:'ADRIATIQUE', start:'1:00am', end:'2:30am', genre:'deep-house' },
+    { stage:'neon-garden', artist:'JOSEPH CAPRIATI', start:'2:30am', end:'4:00am', genre:'techno' },
+    { stage:'neon-garden', artist:'ELI BROWN', start:'4:00am', end:'5:30am', genre:'techno' },
+    // Quantum Valley
+    { stage:'quantum', artist:'SARAH DE WARREN', start:'7:00pm', end:'8:00pm', genre:'trance' },
+    { stage:'quantum', artist:'MATTY RALPH', start:'8:00pm', end:'9:00pm', genre:'trance' },
+    { stage:'quantum', artist:'COLD BLUE', start:'9:00pm', end:'10:00pm', genre:'trance' },
+    { stage:'quantum', artist:'PEGASSI', start:'10:00pm', end:'11:00pm', genre:'trance' },
+    { stage:'quantum', artist:'DARUDE', start:'11:00pm', end:'12:00am', genre:'trance' },
+    { stage:'quantum', artist:'COSMIC GATE', start:'12:00am', end:'1:00am', genre:'trance' },
+    { stage:'quantum', artist:'GARETH EMERY', start:'1:00am', end:'2:00am', genre:'trance' },
+    { stage:'quantum', artist:'ILAN BLUESTONE', start:'2:00am', end:'3:00am', genre:'trance' },
+    { stage:'quantum', artist:'PAUL VAN DYK', start:'3:00am', end:'4:00am', genre:'trance' },
+    { stage:'quantum', artist:'DARREN PORTER', start:'4:00am', end:'5:30am', genre:'trance' },
+    // Wasteland
+    { stage:'wasteland', artist:'DOMINA', start:'7:00pm', end:'8:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'SERAFINA', start:'8:30pm', end:'9:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'JOHANNES SCHUSTER', start:'9:30pm', end:'10:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'ADRIAN MILLS', start:'10:30pm', end:'11:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'CLOUDY', start:'11:30pm', end:'12:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'KUKO', start:'12:30am', end:'1:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'GRAVEDGR', start:'1:30am', end:'2:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'REBEKAH', start:'2:30am', end:'3:30am', genre:'techno' },
+    { stage:'wasteland', artist:'DYEN', start:'3:30am', end:'4:30am', genre:'hard-techno' },
+    { stage:'wasteland', artist:'STAN CHRIST', start:'4:30am', end:'5:30am', genre:'hardstyle' },
+    // Stereobloom
+    { stage:'stereobloom', artist:'ABANA B2B JULIET MENDOZA', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'SLAMM', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'LUUK VAN DIJK', start:'9:00pm', end:'10:15pm', genre:'house' },
+    { stage:'stereobloom', artist:'OMAR+', start:'10:15pm', end:'11:30pm', genre:'house' },
+    { stage:'stereobloom', artist:'LUKE DEAN', start:'11:30pm', end:'12:45am', genre:'house' },
+    { stage:'stereobloom', artist:'JOSH BAKER', start:'12:45am', end:'2:00am', genre:'house' },
+    { stage:'stereobloom', artist:'MAX DEAN', start:'2:00am', end:'3:15am', genre:'house' },
+    { stage:'stereobloom', artist:'OBSKUR', start:'3:15am', end:'4:30am', genre:'house' },
+    { stage:'stereobloom', artist:'TOMAN', start:'4:30am', end:'5:30am', genre:'house' },
+    // Bionic Jungle
+    { stage:'bionic', artist:'HEIDI LAWDEN B2B MASHA MAR', start:'5:00pm', end:'7:00pm', genre:'house' },
+    { stage:'bionic', artist:'STACY CHRISTINE', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'bionic', artist:'THE CARRY NATION', start:'8:00pm', end:'9:30pm', genre:'house' },
+    { stage:'bionic', artist:'MASSIMILIANO PAGLIARA', start:'9:30pm', end:'11:00pm', genre:'house' },
+    { stage:'bionic', artist:'PARAMIDA', start:'11:00pm', end:'12:30am', genre:'house' },
+    { stage:'bionic', artist:'SALUTE B2B CHLOE CAILLET', start:'12:30am', end:'2:30am', genre:'house' },
+    { stage:'bionic', artist:'ROBERT HOOD', start:'2:30am', end:'4:00am', genre:'techno' },
+    { stage:'bionic', artist:'AVALON EMERSON', start:'4:00am', end:'5:30am', genre:'house' },
+    // Casa Bacardi
+    { stage:'casa', artist:'JRUIZ', start:'7:00pm', end:'8:00pm', genre:'latin' },
+    { stage:'casa', artist:'CARDO', start:'8:00pm', end:'9:00pm', genre:'latin' },
+    { stage:'casa', artist:'J PATRON', start:'9:00pm', end:'10:00pm', genre:'latin' },
+    { stage:'casa', artist:'CC LOVE', start:'10:00pm', end:'11:30pm', genre:'latin' },
+    { stage:'casa', artist:'JFUSE', start:'11:30pm', end:'1:00am', genre:'latin' },
+    { stage:'casa', artist:'DRAMOS', start:'1:00am', end:'2:30am', genre:'latin' },
+    { stage:'casa', artist:'GUARI', start:'2:30am', end:'4:00am', genre:'latin' },
+    { stage:'casa', artist:'DJ EXILE', start:'4:00am', end:'5:30am', genre:'latin' },
+    // Forest House
+    { stage:'forest', artist:'BIG DADDY KESS', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'forest', artist:'SUSSY', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'forest', artist:'DONO', start:'9:00pm', end:'10:00pm', genre:'house' },
+    { stage:'forest', artist:'MAX LOW', start:'10:00pm', end:'11:00pm', genre:'house' },
+    { stage:'forest', artist:'JOEY G', start:'11:00pm', end:'12:00am', genre:'house' },
+    { stage:'forest', artist:'CASTOR & POLLUX', start:'1:00am', end:'2:00am', genre:'house' },
+    { stage:'forest', artist:'ZAANEE', start:'2:00am', end:'3:00am', genre:'house' },
+    { stage:'forest', artist:'TC', start:'3:00am', end:'4:00am', genre:'house' },
+    { stage:'forest', artist:'PLS&TY', start:'4:00am', end:'5:30am', genre:'house' },
+    // YeeDC
+    { stage:'yeedc', artist:'SOSO DRU', start:'7:00pm', end:'8:45pm', genre:'bass' },
+    { stage:'yeedc', artist:'$AMI G', start:'8:45pm', end:'10:15pm', genre:'bass' },
+    { stage:'yeedc', artist:'DIRTY AUDIO', start:'10:15pm', end:'12:00am', genre:'bass' },
+    { stage:'yeedc', artist:'GRANT FISHER', start:'12:00am', end:'1:30am', genre:'bass' },
+    { stage:'yeedc', artist:'ROADHOUSE', start:'1:30am', end:'3:15am', genre:'bass' },
+    // Beatbox Art Car
+    { stage:'beatbox', artist:'NOT NOT', start:'7:00pm', end:'8:15pm', genre:'varied' },
+    { stage:'beatbox', artist:'MER BEAR', start:'8:15pm', end:'9:30pm', genre:'varied' },
+    { stage:'beatbox', artist:'LADY SINCLAIR', start:'9:30pm', end:'10:45pm', genre:'varied' },
+    { stage:'beatbox', artist:'TSU NAMI', start:'10:45pm', end:'12:00am', genre:'varied' },
+    { stage:'beatbox', artist:'ARMNHMR', start:'12:00am', end:'1:30am', genre:'melodic-bass' },
+    { stage:'beatbox', artist:'ERO808', start:'1:30am', end:'3:00am', genre:'varied' },
+    { stage:'beatbox', artist:'KELLAND', start:'3:00am', end:'4:15am', genre:'varied' },
+    { stage:'beatbox', artist:'TAVATLI', start:'4:15am', end:'5:30am', genre:'varied' },
+    // Insomniac Fridays
+    { stage:'insomniac', artist:'THE KANDYMAN', start:'7:00pm', end:'8:30pm', genre:'varied' },
+    { stage:'insomniac', artist:'DEMIGOD', start:'8:30pm', end:'9:45pm', genre:'varied' },
+    { stage:'insomniac', artist:'LOUIS LOVE', start:'9:45pm', end:'11:00pm', genre:'varied' },
+    { stage:'insomniac', artist:'R.A.W.', start:'11:00pm', end:'12:15am', genre:'varied' },
+    { stage:'insomniac', artist:'RON D CORE', start:'12:15am', end:'1:30am', genre:'varied' },
+    { stage:'insomniac', artist:'MOONPUP', start:'1:30am', end:'2:45am', genre:'varied' },
+    { stage:'insomniac', artist:'STEVE LECLAIR', start:'2:45am', end:'4:00am', genre:'varied' },
+    { stage:'insomniac', artist:'JASON SPLAT', start:'4:00am', end:'5:30am', genre:'varied' },
+  ],
+  2: [
+    // Kinetic Field
+    { stage:'kinetic', artist:'AR/CO', start:'7:00pm', end:'8:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'HAYLA', start:'8:00pm', end:'9:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'SUB FOCUS', start:'9:00pm', end:'10:00pm', genre:'dnb' },
+    { stage:'kinetic', artist:'STEVE AOKI', start:'10:07pm', end:'11:15pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'HARDWELL', start:'11:19pm', end:'12:29am', genre:'mainstage' },
+    { stage:'kinetic', artist:'JOHN SUMMIT', start:'12:32am', end:'1:42am', genre:'house' },
+    { stage:'kinetic', artist:'SUBTRONICS', start:'1:47am', end:'2:57am', genre:'dubstep' },
+    { stage:'kinetic', artist:'KASKADE', start:'3:01am', end:'4:11am', genre:'house' },
+    { stage:'kinetic', artist:'ABOVE & BEYOND', start:'4:14am', end:'5:29am', genre:'trance' },
+    // Circuit Grounds
+    { stage:'circuit', artist:'DJ MANDY', start:'7:00pm', end:'8:00pm', genre:'techno' },
+    { stage:'circuit', artist:'ROZ', start:'8:00pm', end:'9:15pm', genre:'techno' },
+    { stage:'circuit', artist:'KETTAMA', start:'9:15pm', end:'10:45pm', genre:'house' },
+    { stage:'circuit', artist:'SAMMY VIRJI', start:'10:45pm', end:'12:15am', genre:'bass' },
+    { stage:'circuit', artist:'TIËSTO', start:'12:15am', end:'1:45am', genre:'mainstage' },
+    { stage:'circuit', artist:'PEGGY GOU B2B KI/KI', start:'1:45am', end:'3:15am', genre:'house' },
+    { stage:'circuit', artist:'BOYS NOIZE', start:'3:15am', end:'4:30am', genre:'electro' },
+    { stage:'circuit', artist:'LILLY PALMER', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Cosmic Meadow
+    { stage:'cosmic', artist:'FROST CHILDREN', start:'7:00pm', end:'8:15pm', genre:'hyperpop' },
+    { stage:'cosmic', artist:'HANNAH LAING', start:'8:15pm', end:'9:25pm', genre:'hard-house' },
+    { stage:'cosmic', artist:'SNOW STRIPPERS', start:'9:25pm', end:'10:15pm', genre:'electro' },
+    { stage:'cosmic', artist:'VTSS', start:'10:15pm', end:'11:30pm', genre:'hard-techno' },
+    { stage:'cosmic', artist:'THE PRODIGY', start:'11:35pm', end:'12:35am', genre:'electro' },
+    { stage:'cosmic', artist:'BUNT.', start:'12:40am', end:'2:10am', genre:'folk-house' },
+    { stage:'cosmic', artist:'INTERPLANETARY CRIMINAL', start:'2:10am', end:'3:30am', genre:'ukg' },
+    { stage:'cosmic', artist:'MALUGI', start:'3:30am', end:'4:30am', genre:'house' },
+    { stage:'cosmic', artist:'DJ GIGOLA B2B MCR-T', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Basspod
+    { stage:'basspod', artist:'FALLEN WITH MC DINO', start:'7:00pm', end:'7:50pm', genre:'dnb' },
+    { stage:'basspod', artist:'AVELLO B2B DENNETT', start:'7:50pm', end:'8:40pm', genre:'dubstep' },
+    { stage:'basspod', artist:'VIPERACTIVE', start:'8:40pm', end:'9:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'HYBRID MINDS', start:'9:30pm', end:'10:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'YDG', start:'10:30pm', end:'11:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'DELTA HEAVY', start:'11:30pm', end:'12:30am', genre:'dnb' },
+    { stage:'basspod', artist:'GETTER', start:'12:30am', end:'1:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'EPTIC B2B SPACE LACES', start:'1:30am', end:'2:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'DOCTOR P B2B FLUX PAVILION B2B FUNTCASE', start:'2:30am', end:'3:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'HOL!', start:'3:30am', end:'4:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'MARY DROPPINZ', start:'4:30am', end:'5:30am', genre:'dubstep' },
+    // Neon Garden
+    { stage:'neon-garden', artist:'MINK', start:'7:00pm', end:'8:30pm', genre:'techno' },
+    { stage:'neon-garden', artist:'SILVIE LOTO', start:'8:30pm', end:'10:00pm', genre:'house' },
+    { stage:'neon-garden', artist:'AHMED SPINS', start:'10:00pm', end:'11:30pm', genre:'house' },
+    { stage:'neon-garden', artist:'LUCIANO', start:'11:30pm', end:'1:30am', genre:'house' },
+    { stage:'neon-garden', artist:'PROSPA', start:'1:30am', end:'3:30am', genre:'house' },
+    { stage:'neon-garden', artist:'JOSH BAKER B2B KETTAMA B2B PROSPA', start:'3:30am', end:'5:30am', genre:'house' },
+    // Quantum Valley
+    { stage:'quantum', artist:'MARIA HEALY', start:'7:00pm', end:'8:30pm', genre:'trance' },
+    { stage:'quantum', artist:'SUPERSTRINGS', start:'8:30pm', end:'9:30pm', genre:'trance' },
+    { stage:'quantum', artist:'BILLY GILLIES', start:'9:30pm', end:'10:30pm', genre:'trance' },
+    { stage:'quantum', artist:'PAUL OAKENFOLD', start:'10:30pm', end:'11:30pm', genre:'trance' },
+    { stage:'quantum', artist:'ANDREW RAYEL', start:'11:30pm', end:'12:30am', genre:'trance' },
+    { stage:'quantum', artist:'MADDIX', start:'12:30am', end:'1:30am', genre:'trance' },
+    { stage:'quantum', artist:'MATHAME', start:'1:30am', end:'2:30am', genre:'trance' },
+    { stage:'quantum', artist:'ASTRIX', start:'2:30am', end:'3:30am', genre:'psytrance' },
+    { stage:'quantum', artist:'T78', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'quantum', artist:'THOMAS SCHUMACHER', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Wasteland
+    { stage:'wasteland', artist:'CUTDWN', start:'7:00pm', end:'8:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'DEAD X', start:'8:30pm', end:'9:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'THE SAINTS', start:'9:30pm', end:'10:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'ROB GEE B2B LENNY DEE', start:'10:30pm', end:'11:30pm', genre:'hardcore' },
+    { stage:'wasteland', artist:'LADY FAITH B2B LNY TNZ', start:'11:30pm', end:'12:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'CODE BLACK B2B AUDIOFREQ B2B TONESHIFTERZ', start:'12:30am', end:'1:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'DA TWEEKAZ', start:'1:30am', end:'2:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'LIL TEXAS', start:'2:30am', end:'3:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'MISH', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'wasteland', artist:'ALYSSA JOLEE', start:'4:30am', end:'5:30am', genre:'hardstyle' },
+    // Stereobloom
+    { stage:'stereobloom', artist:'SLUGG', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'DISCIP', start:'9:00pm', end:'10:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'OMNOM', start:'10:00pm', end:'11:15pm', genre:'house' },
+    { stage:'stereobloom', artist:'NOIZU', start:'11:15pm', end:'12:30am', genre:'house' },
+    { stage:'stereobloom', artist:'WAX MOTIF', start:'12:30am', end:'1:45am', genre:'house' },
+    { stage:'stereobloom', artist:'CID', start:'1:45am', end:'3:00am', genre:'house' },
+    { stage:'stereobloom', artist:'HNTR', start:'3:00am', end:'4:15am', genre:'house' },
+    { stage:'stereobloom', artist:'BOLO', start:'4:15am', end:'5:30am', genre:'house' },
+    // Bionic Jungle
+    { stage:'bionic', artist:'SPRAY', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'bionic', artist:'BASHKKA B2B SEDEF ADASI', start:'9:00pm', end:'10:30pm', genre:'house' },
+    { stage:'bionic', artist:'HAAI B2B LUKE ALESSI', start:'10:30pm', end:'12:00am', genre:'house' },
+    { stage:'bionic', artist:'MCR-T', start:'12:00am', end:'1:15am', genre:'techno' },
+    { stage:'bionic', artist:'BAD BOOMBOX B2B OLLIE LISHMAN', start:'1:15am', end:'2:30am', genre:'house' },
+    { stage:'bionic', artist:'BENWAL', start:'2:30am', end:'3:30am', genre:'house' },
+    { stage:'bionic', artist:'BAUGRUPPE90', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'bionic', artist:'CLUB ANGEL', start:'4:30am', end:'5:30am', genre:'house' },
+    // Casa Bacardi
+    { stage:'casa', artist:'LUCKY LOU', start:'7:00pm', end:'8:30pm', genre:'latin' },
+    { stage:'casa', artist:'LUKE ALEXANDER', start:'8:30pm', end:'10:00pm', genre:'latin' },
+    { stage:'casa', artist:'DREYA V', start:'11:30pm', end:'1:00am', genre:'latin' },
+    { stage:'casa', artist:'ELI FOLA', start:'2:30am', end:'4:00am', genre:'latin' },
+    { stage:'casa', artist:'SKILAH', start:'4:00am', end:'5:30am', genre:'latin' },
+    // Forest House
+    { stage:'forest', artist:'AJ BALL', start:'7:00pm', end:'7:45pm', genre:'house' },
+    { stage:'forest', artist:'LINNEY', start:'7:45pm', end:'8:45pm', genre:'house' },
+    { stage:'forest', artist:'JUSTUS', start:'8:45pm', end:'9:45pm', genre:'house' },
+    { stage:'forest', artist:'DISCOVERY PROJECT', start:'9:45pm', end:'10:45pm', genre:'house' },
+    { stage:'forest', artist:'MATT FAULK', start:'10:45pm', end:'12:00am', genre:'house' },
+    { stage:'forest', artist:'POLAR BEARS', start:'12:00am', end:'1:00am', genre:'house' },
+    { stage:'forest', artist:'DAMON SHARPE', start:'3:00am', end:'4:00am', genre:'house' },
+    { stage:'forest', artist:'MICAH MARTIN', start:'4:00am', end:'5:30am', genre:'house' },
+    // YeeDC
+    { stage:'yeedc', artist:'CARNEYVAL', start:'7:00pm', end:'8:45pm', genre:'bass' },
+    { stage:'yeedc', artist:'ROXY FERRARI', start:'8:45pm', end:'10:15pm', genre:'bass' },
+    { stage:'yeedc', artist:'DAZY DUKE', start:'10:15pm', end:'12:00am', genre:'bass' },
+    { stage:'yeedc', artist:'MADDS', start:'12:00am', end:'1:30am', genre:'bass' },
+    { stage:'yeedc', artist:'SLIM MCGRAW', start:'1:30am', end:'3:15am', genre:'bass' },
+    { stage:'yeedc', artist:'TAYLOR KADE', start:'3:15am', end:'4:15am', genre:'bass' },
+    // Beatbox Art Car
+    { stage:'beatbox', artist:'GUSTA', start:'7:00pm', end:'8:15pm', genre:'varied' },
+    { stage:'beatbox', artist:'RAJE', start:'8:15pm', end:'9:30pm', genre:'varied' },
+    { stage:'beatbox', artist:'BENNI OLA', start:'9:30pm', end:'10:45pm', genre:'varied' },
+    { stage:'beatbox', artist:'PLAYER DAVE', start:'10:45pm', end:'12:00am', genre:'varied' },
+    { stage:'beatbox', artist:'CANARY YELLOW', start:'12:00am', end:'1:30am', genre:'varied' },
+    { stage:'beatbox', artist:'SAMSON', start:'1:30am', end:'3:00am', genre:'varied' },
+    { stage:'beatbox', artist:'MATTILO', start:'3:00am', end:'4:15am', genre:'varied' },
+    { stage:'beatbox', artist:'OKAYVAL', start:'4:15am', end:'5:30am', genre:'varied' },
+    // Insomniac Fridays (stage runs all 3 days)
+    { stage:'insomniac', artist:'DJ FLITE', start:'7:00pm', end:'8:30pm', genre:'varied' },
+    { stage:'insomniac', artist:'TONY CAMBOA', start:'8:30pm', end:'9:45pm', genre:'varied' },
+    { stage:'insomniac', artist:'REID SPEED', start:'9:45pm', end:'11:00pm', genre:'varied' },
+    { stage:'insomniac', artist:'FESTER, OSCURE & THEE-O', start:'11:00pm', end:'1:30am', genre:'varied' },
+    { stage:'insomniac', artist:'MELLINFUNK', start:'1:30am', end:'2:45am', genre:'varied' },
+    { stage:'insomniac', artist:'JON BISHOP', start:'2:45am', end:'4:00am', genre:'varied' },
+    { stage:'insomniac', artist:'ERIC DAVENPORT', start:'4:00am', end:'5:30am', genre:'varied' },
+  ],
+  3: [
+    // Kinetic Field
+    { stage:'kinetic', artist:'TRACE', start:'7:00pm', end:'8:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'SHIP WREK', start:'8:00pm', end:'9:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'LAYTON GIORDANI', start:'9:00pm', end:'10:00pm', genre:'techno' },
+    { stage:'kinetic', artist:'FUNK TRIBU', start:'10:07pm', end:'11:15pm', genre:'house' },
+    { stage:'kinetic', artist:'GRIZ B2B WOOLI', start:'11:19pm', end:'12:29am', genre:'bass' },
+    { stage:'kinetic', artist:'ZEDD', start:'12:32am', end:'1:42am', genre:'mainstage' },
+    { stage:'kinetic', artist:'MARTIN GARRIX', start:'1:47am', end:'2:57am', genre:'mainstage' },
+    { stage:'kinetic', artist:'CLOONEE', start:'3:01am', end:'4:11am', genre:'tech-house' },
+    { stage:'kinetic', artist:'ARMIN VAN BUUREN', start:'4:14am', end:'5:29am', genre:'trance' },
+    // Circuit Grounds
+    { stage:'circuit', artist:'LINSKA', start:'7:00pm', end:'8:30pm', genre:'techno' },
+    { stage:'circuit', artist:'ANNA', start:'8:30pm', end:'10:00pm', genre:'techno' },
+    { stage:'circuit', artist:'BELTRAN', start:'10:00pm', end:'11:30pm', genre:'house' },
+    { stage:'circuit', artist:'CHRIS STUSSY', start:'11:30pm', end:'1:00am', genre:'house' },
+    { stage:'circuit', artist:'SOLOMUN', start:'1:00am', end:'2:30am', genre:'house' },
+    { stage:'circuit', artist:'VINTAGE CULTURE', start:'2:30am', end:'4:00am', genre:'house' },
+    { stage:'circuit', artist:'KEVIN DE VRIES', start:'4:00am', end:'5:30am', genre:'techno' },
+    // Cosmic Meadow
+    { stage:'cosmic', artist:'GRAVAGERZ', start:'7:00pm', end:'8:00pm', genre:'bass' },
+    { stage:'cosmic', artist:'NOSTALGIX', start:'8:00pm', end:'9:00pm', genre:'bass' },
+    { stage:'cosmic', artist:'WILLIAM BLACK', start:'9:00pm', end:'10:00pm', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'SAN HOLO', start:'10:00pm', end:'11:00pm', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'DABIN', start:'11:00pm', end:'12:05am', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'ALISON WONDERLAND', start:'12:05am', end:'1:05am', genre:'bass' },
+    { stage:'cosmic', artist:'SEVEN LIONS', start:'1:05am', end:'2:20am', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'RESTRICTED', start:'2:20am', end:'3:20am', genre:'techno' },
+    { stage:'cosmic', artist:'BLACK TIGER SEX MACHINE', start:'3:20am', end:'4:30am', genre:'bass' },
+    { stage:'cosmic', artist:'NICO MORENO B2B HOLY PRIEST', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Basspod
+    { stage:'basspod', artist:'NIGHTSTALKER', start:'7:00pm', end:'7:50pm', genre:'dnb' },
+    { stage:'basspod', artist:'SIPPY', start:'7:50pm', end:'8:40pm', genre:'dubstep' },
+    { stage:'basspod', artist:'EAZYBAKED', start:'8:40pm', end:'9:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'INFEKT B2B SAMPLIFIRE', start:'9:30pm', end:'10:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'A.M.C', start:'10:30pm', end:'11:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'VIRTUAL RIOT', start:'11:30pm', end:'12:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'PEEKABOO', start:'12:30am', end:'1:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'AHEE B2B LIQUID STRANGER', start:'1:30am', end:'2:30am', genre:'bass' },
+    { stage:'basspod', artist:'WHETHAN', start:'2:30am', end:'3:30am', genre:'bass' },
+    { stage:'basspod', artist:'BOOGIE T B2B DISTINCT MOTIVE', start:'3:30am', end:'4:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'AEON:MODE', start:'4:30am', end:'5:30am', genre:'bass' },
+    // Neon Garden
+    { stage:'neon-garden', artist:'BAD BEAT', start:'7:00pm', end:'8:15pm', genre:'techno' },
+    { stage:'neon-garden', artist:'ADIEL', start:'9:30pm', end:'10:50pm', genre:'techno' },
+    { stage:'neon-garden', artist:'DJ GIGOLA', start:'10:50pm', end:'12:10am', genre:'techno' },
+    { stage:'neon-garden', artist:'999999999', start:'12:10am', end:'1:30am', genre:'techno' },
+    { stage:'neon-garden', artist:'INDIRA PAGANOTTO', start:'1:30am', end:'2:50am', genre:'techno' },
+    { stage:'neon-garden', artist:'KI/KI', start:'2:50am', end:'4:10am', genre:'techno' },
+    { stage:'neon-garden', artist:'KLANGKUENSTLER', start:'4:10am', end:'5:30am', genre:'techno' },
+    // Quantum Valley
+    { stage:'quantum', artist:'WARUNG', start:'7:00pm', end:'8:00pm', genre:'trance' },
+    { stage:'quantum', artist:'SHINGO NAKAMURA', start:'8:00pm', end:'9:00pm', genre:'trance' },
+    { stage:'quantum', artist:'REBUKE', start:'9:00pm', end:'10:00pm', genre:'trance' },
+    { stage:'quantum', artist:'CRISTOPH', start:'10:00pm', end:'11:00pm', genre:'techno' },
+    { stage:'quantum', artist:'ELI & FUR', start:'11:00pm', end:'12:00am', genre:'trance' },
+    { stage:'quantum', artist:'TINLICKER', start:'12:00am', end:'1:00am', genre:'trance' },
+    { stage:'quantum', artist:'CASSIAN', start:'1:00am', end:'2:15am', genre:'trance' },
+    { stage:'quantum', artist:'MASSANO', start:'2:15am', end:'3:30am', genre:'techno' },
+    { stage:'quantum', artist:'INNELLEA', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'quantum', artist:'KREAM', start:'4:30am', end:'5:30am', genre:'trance' },
+    // Wasteland
+    { stage:'wasteland', artist:'SIHK', start:'7:00pm', end:'8:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'CLAWZ', start:'8:30pm', end:'9:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'THE PURGE', start:'9:30pm', end:'10:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'YOSUF', start:'10:30pm', end:'11:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'DJ ISAAC', start:'11:30pm', end:'12:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'VIEZE ASBAK', start:'12:30am', end:'1:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'SUB ZERO PROJECT', start:'1:30am', end:'2:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'ROOLER', start:'2:30am', end:'3:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'WARFACE', start:'3:30am', end:'4:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'MADGRRL B2B VESSEL', start:'4:30am', end:'5:30am', genre:'hardstyle' },
+    // Stereobloom
+    { stage:'stereobloom', artist:'KLO', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'MURPHY\'S LAW', start:'8:00pm', end:'9:15pm', genre:'house' },
+    { stage:'stereobloom', artist:'SIDNEY CHARLES B2B BUSHBABY', start:'9:15pm', end:'10:30pm', genre:'house' },
+    { stage:'stereobloom', artist:'SKREAM', start:'10:30pm', end:'11:45pm', genre:'dubstep' },
+    { stage:'stereobloom', artist:'HAMDI', start:'11:45pm', end:'1:00am', genre:'bass' },
+    { stage:'stereobloom', artist:'CHRIS LORENZO B2B BULLET TOOTH', start:'1:00am', end:'2:15am', genre:'house/bass' },
+    { stage:'stereobloom', artist:'SILVA BUMPA', start:'2:15am', end:'3:30am', genre:'house' },
+    { stage:'stereobloom', artist:'MORGAN SEATREE', start:'3:30am', end:'4:30am', genre:'house' },
+    { stage:'stereobloom', artist:'LU.RE', start:'4:30am', end:'5:30am', genre:'house' },
+    // Bionic Jungle
+    { stage:'bionic', artist:'ALVES', start:'7:00pm', end:'8:30pm', genre:'house' },
+    { stage:'bionic', artist:'ISABELLA', start:'8:30pm', end:'10:30pm', genre:'house' },
+    { stage:'bionic', artist:'KINAHAU', start:'10:30pm', end:'12:00am', genre:'house' },
+    { stage:'bionic', artist:'TIGA', start:'12:00am', end:'1:30am', genre:'electro' },
+    { stage:'bionic', artist:'DJ TENNIS B2B RED AXES', start:'1:30am', end:'3:30am', genre:'house' },
+    { stage:'bionic', artist:'BELTRAN B2B SIMAS', start:'3:30am', end:'5:30am', genre:'house' },
+    // Casa Bacardi
+    { stage:'casa', artist:'ESPII', start:'7:00pm', end:'8:00pm', genre:'latin' },
+    { stage:'casa', artist:'SORAYA', start:'8:00pm', end:'9:00pm', genre:'latin' },
+    { stage:'casa', artist:'DOOZIE', start:'9:00pm', end:'10:00pm', genre:'latin' },
+    { stage:'casa', artist:'BROSA', start:'10:00pm', end:'11:15pm', genre:'latin' },
+    { stage:'casa', artist:'JUOS', start:'11:15pm', end:'1:30am', genre:'latin' },
+    { stage:'casa', artist:'ROMMII', start:'1:30am', end:'2:45am', genre:'latin' },
+    { stage:'casa', artist:'CLOSE FRIENDS ONLY', start:'2:45am', end:'4:00am', genre:'latin' },
+    { stage:'casa', artist:'B2B2B2B', start:'4:00am', end:'5:30am', genre:'latin' },
+    // Forest House
+    { stage:'forest', artist:'ASSEMBLY', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'forest', artist:'WARD ANDREWS', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'forest', artist:'NEON DELUZ', start:'9:00pm', end:'10:00pm', genre:'house' },
+    { stage:'forest', artist:'TENSTEPS', start:'10:00pm', end:'11:00pm', genre:'trance' },
+    { stage:'forest', artist:'JUST.SHAUN', start:'11:00pm', end:'12:00am', genre:'house' },
+    { stage:'forest', artist:'GOSHFATHER', start:'12:00am', end:'1:00am', genre:'house' },
+    { stage:'forest', artist:'SILVER PANDA', start:'1:00am', end:'2:00am', genre:'house' },
+    { stage:'forest', artist:'NEKTER', start:'2:00am', end:'3:00am', genre:'house' },
+    { stage:'forest', artist:'TIM CLARK', start:'3:00am', end:'4:00am', genre:'house' },
+    { stage:'forest', artist:'SYNNHAVEN', start:'4:00am', end:'5:30am', genre:'house' },
+    // YeeDC
+    { stage:'yeedc', artist:'JOHN PRICE', start:'7:00pm', end:'8:45pm', genre:'bass' },
+    { stage:'yeedc', artist:'BAD ASH', start:'8:45pm', end:'10:15pm', genre:'bass' },
+    { stage:'yeedc', artist:'SOMMER RAY', start:'10:15pm', end:'12:00am', genre:'bass' },
+    { stage:'yeedc', artist:'DISKO COWBOY', start:'12:00am', end:'1:30am', genre:'bass' },
+    { stage:'yeedc', artist:'ASHLEY WALLS', start:'1:30am', end:'3:15am', genre:'bass' },
+    { stage:'yeedc', artist:'WILLIE PAKE', start:'3:15am', end:'4:15am', genre:'bass' },
+    // Beatbox Art Car
+    { stage:'beatbox', artist:'CHASSI', start:'7:00pm', end:'8:15pm', genre:'varied' },
+    { stage:'beatbox', artist:'ODD LANGUAGE', start:'8:15pm', end:'9:30pm', genre:'varied' },
+    { stage:'beatbox', artist:'WOLFIE', start:'9:30pm', end:'10:45pm', genre:'varied' },
+    { stage:'beatbox', artist:'CHIBS', start:'10:45pm', end:'12:00am', genre:'varied' },
+    { stage:'beatbox', artist:'2DY4', start:'12:00am', end:'1:30am', genre:'varied' },
+    { stage:'beatbox', artist:'SQISHI', start:'1:30am', end:'3:00am', genre:'varied' },
+    { stage:'beatbox', artist:'SISTO', start:'3:00am', end:'4:15am', genre:'varied' },
+    { stage:'beatbox', artist:'VICIOUS', start:'4:15am', end:'5:30am', genre:'varied' },
+    // Insomniac Fridays (stage runs all 3 days)
+    { stage:'insomniac', artist:'KENDO', start:'7:00pm', end:'8:30pm', genre:'varied' },
+    { stage:'insomniac', artist:'MARS', start:'8:30pm', end:'9:45pm', genre:'varied' },
+    { stage:'insomniac', artist:'MARK LEWIS', start:'9:45pm', end:'11:00pm', genre:'varied' },
+    { stage:'insomniac', artist:'STEVE LORIA', start:'11:00pm', end:'12:15am', genre:'varied' },
+    { stage:'insomniac', artist:'FRANKIE BONES', start:'12:15am', end:'1:30am', genre:'varied' },
+    { stage:'insomniac', artist:'DONALD GLAUDE', start:'1:30am', end:'2:45am', genre:'varied' },
+    { stage:'insomniac', artist:'CHARLES FEELGOOD', start:'2:45am', end:'4:00am', genre:'varied' },
+    { stage:'insomniac', artist:'MARK E QUARK', start:'4:00am', end:'5:30am', genre:'varied' },
+  ]
+};
+
+
+// ============================================
+// STATE
+// ============================================
+let currentDay = 1;
+let myScheduleOnly = false;
+let selections = {}; // { day: { key: tier } }
+let notes = {}; // { key: noteText }
+let longPressTimer = null;
+let currentModalKey = null;
+
+// Load from localStorage + URL hash
+function loadState() {
+  try {
+    const saved = localStorage.getItem('edc2026-selections');
+    if (saved) selections = JSON.parse(saved);
+  } catch(e) {}
+  try {
+    const savedNotes = localStorage.getItem('edc2026-notes');
+    if (savedNotes) notes = JSON.parse(savedNotes);
+  } catch(e) {}
+  // URL hash override
+  if (location.hash.startsWith('#share=')) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(atob(location.hash.slice(7))));
+      if (decoded.selections) selections = decoded.selections;
+      if (decoded.notes) notes = decoded.notes;
+      if (decoded.day) currentDay = decoded.day;
+    } catch(e) {}
+  }
+}
+
+function persist() {
+  try {
+    localStorage.setItem('edc2026-selections', JSON.stringify(selections));
+    localStorage.setItem('edc2026-notes', JSON.stringify(notes));
+  } catch(e) {}
+}
+
+function setKey(set) { return `${set.stage}|${set.artist}|${set.start}`; }
+
+function getTier(day, key) {
+  return (selections[day] && selections[day][key]) || 'off';
+}
+
+function setTier(day, key, tier) {
+  if (!selections[day]) selections[day] = {};
+  if (tier === 'off') delete selections[day][key];
+  else selections[day][key] = tier;
+  persist();
+}
+
+// ============================================
+// TIME PARSING
+// ============================================
+function parseTime(t, day) {
+  const cfg = DAY_CONFIG[day];
+  const m = t.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1]);
+  const min = parseInt(m[2]);
+  const ampm = m[3].toLowerCase();
+  if (ampm === 'pm' && h !== 12) h += 12;
+  if (ampm === 'am' && h === 12) h = 0;
+  let totalMin = h * 60 + min;
+  if (totalMin < cfg.startMin) totalMin += 24 * 60;
+  return totalMin - cfg.startMin;
+}
+
+function fmtTime(t) {
+  return t.replace(':00', '').replace(/(am|pm)/i, m => m.toUpperCase());
+}
+
+function formatTime24(t) {
+  const m = t.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+  let h = parseInt(m[1]);
+  const min = m[2];
+  const ampm = m[3].toLowerCase();
+  if (ampm === 'pm' && h !== 12) h += 12;
+  if (ampm === 'am' && h === 12) h = 0;
+  return `${String(h).padStart(2,'0')}:${min}`;
+}
+
+// ============================================
+// GRID RENDERING
+// ============================================
+const grid = document.getElementById('grid');
+const gridWrap = document.getElementById('gridWrap');
+
+function renderGrid(day) {
+  grid.innerHTML = '';
+  const cfg = DAY_CONFIG[day];
+  const data = LINEUP[day] || [];
+  const pxPerMin = cfg.pxPerMin;
+  const totalMin = cfg.endMin - cfg.startMin;
+  const totalHeight = totalMin * pxPerMin;
+
+  // Set grid height
+  grid.style.gridTemplateRows = `var(--header-height) ${totalHeight}px`;
+
+  // Stage headers row
+  const corner = document.createElement('div');
+  corner.className = 'corner';
+  grid.appendChild(corner);
+
+  STAGES.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'stage-header';
+    el.style.setProperty('--stage-color', s.color);
+    el.innerHTML = `<div class="name">${s.name}</div>`;
+    grid.appendChild(el);
+  });
+
+  // Time column
+  const timeCol = document.createElement('div');
+  timeCol.className = 'time-col';
+  timeCol.style.height = totalHeight + 'px';
+
+  const hours = [];
+  for (let h = 0; h <= Math.ceil(totalMin/60); h++) {
+    const min = h * 60;
+    if (min > totalMin) break;
+    const realMin = cfg.startMin + min;
+    const realH = Math.floor(realMin / 60) % 24;
+    const ampm = realH >= 12 ? 'PM' : 'AM';
+    const displayH = realH % 12 || 12;
+    hours.push({ min, label: `${displayH} ${ampm}`, first: h === 0 });
+  }
+  hours.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'time-marker' + (h.first ? ' first' : '');
+    el.style.top = (h.min * pxPerMin) + 'px';
+    el.textContent = h.label;
+    timeCol.appendChild(el);
+  });
+  grid.appendChild(timeCol);
+
+  // Stage columns with sets
+  STAGES.forEach(s => {
+    const col = document.createElement('div');
+    col.className = 'stage-col';
+    col.style.setProperty('--stage-color', s.color);
+    col.style.height = totalHeight + 'px';
+
+    const sets = data.filter(set => set.stage === s.id);
+    sets.forEach(set => {
+      const startMin = parseTime(set.start, day);
+      const endMin = parseTime(set.end, day);
+      if (startMin === null || endMin === null) return;
+
+      const top = startMin * pxPerMin;
+      const height = (endMin - startMin) * pxPerMin;
+      const key = setKey(set);
+      const tier = getTier(day, key);
+
+      const el = document.createElement('div');
+      el.className = 'set tier-' + tier;
+      el.style.setProperty('--stage-color', s.color);
+      el.style.top = top + 'px';
+      el.style.height = (height - 2) + 'px';
+      el.dataset.key = key;
+      el.dataset.day = day;
+
+      const noteIndicator = notes[key] ? '<span class="note-dot"></span>' : '';
+      el.innerHTML = `
+        <div class="artist">${set.artist}${noteIndicator}</div>
+        <div class="time">${fmtTime(set.start)}–${fmtTime(set.end)}</div>
+        ${set.genre ? `<div class="genre">${set.genre}</div>` : ''}
+      `;
+
+      // Tap to cycle tier
+      el.addEventListener('click', (e) => {
+        if (el.dataset.longPressed) {
+          delete el.dataset.longPressed;
+          return;
+        }
+        const currentTier = getTier(day, key);
+        const nextTierIndex = (TIERS.indexOf(currentTier) + 1) % TIERS.length;
+        const nextTier = TIERS[nextTierIndex];
+        setTier(day, key, nextTier);
+        el.className = 'set tier-' + nextTier;
+        const artistEl = el.querySelector('.artist');
+        artistEl.innerHTML = set.artist + (notes[key] ? '<span class="note-dot"></span>' : '');
+        updateUI();
+      });
+
+      // Long press for notes
+      el.addEventListener('mousedown', () => startLongPress(el, key, set));
+      el.addEventListener('touchstart', () => startLongPress(el, key, set), {passive:true});
+      el.addEventListener('mouseup', cancelLongPress);
+      el.addEventListener('mouseleave', cancelLongPress);
+      el.addEventListener('touchend', cancelLongPress);
+
+      col.appendChild(el);
+    });
+
+    grid.appendChild(col);
+  });
+
+  applySearch();
+  detectConflicts(day);
+}
+
+function startLongPress(el, key, set) {
+  longPressTimer = setTimeout(() => {
+    el.dataset.longPressed = 'true';
+    openModal(key, set);
+  }, 600);
+}
+function cancelLongPress() {
+  if (longPressTimer) clearTimeout(longPressTimer);
+}
+
+// ============================================
+// MODAL
+// ============================================
+function openModal(key, set) {
+  currentModalKey = key;
+  document.getElementById('modalTitle').textContent = `Note: ${set.artist}`;
+  document.getElementById('modalNote').value = notes[key] || '';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  currentModalKey = null;
+}
+function saveModalNote() {
+  if (currentModalKey) {
+    const text = document.getElementById('modalNote').value.trim();
+    if (text) notes[currentModalKey] = text;
+    else delete notes[currentModalKey];
+    persist();
+    renderGrid(currentDay);
+  }
+  closeModal();
+}
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+// ============================================
+// CONFLICT DETECTION
+// ============================================
+function detectConflicts(day) {
+  const data = LINEUP[day] || [];
+  const mustSets = data.filter(s => getTier(day, setKey(s)) === 'must');
+  const conflicts = [];
+
+  for (let i = 0; i < mustSets.length; i++) {
+    for (let j = i + 1; j < mustSets.length; j++) {
+      const a = mustSets[i], b = mustSets[j];
+      const aStart = parseTime(a.start, day), aEnd = parseTime(a.end, day);
+      const bStart = parseTime(b.start, day), bEnd = parseTime(b.end, day);
+      if (aStart < bEnd && bStart < aEnd) {
+        conflicts.push(`${a.artist} ↔ ${b.artist}`);
+      }
+    }
+  }
+
+  const banner = document.getElementById('conflictBanner');
+  const text = document.getElementById('conflictText');
+  if (conflicts.length) {
+    banner.classList.add('show');
+    text.textContent = `${conflicts.length} conflict${conflicts.length>1?'s':''}: ${conflicts.join(' · ')}`;
+    // Mark conflicting sets
+    document.querySelectorAll('.set.tier-must').forEach(el => {
+      const key = el.dataset.key;
+      const set = data.find(s => setKey(s) === key);
+      if (set) {
+        const hasConflict = mustSets.some(other => {
+          if (setKey(other) === key) return false;
+          const s1 = parseTime(set.start, day), e1 = parseTime(set.end, day);
+          const s2 = parseTime(other.start, day), e2 = parseTime(other.end, day);
+          return s1 < e2 && s2 < e1;
+        });
+        el.classList.toggle('conflict', hasConflict);
+      }
+    });
+  } else {
+    banner.classList.remove('show');
+    document.querySelectorAll('.set.tier-must.conflict').forEach(el => el.classList.remove('conflict'));
+  }
+}
+
+// ============================================
+// UI UPDATES
+// ============================================
+function updateUI() {
+  const data = LINEUP[currentDay] || [];
+  const counts = { off:0, maybe:0, want:0, must:0 };
+  data.forEach(s => { counts[getTier(currentDay, setKey(s))]++; });
+
+  document.getElementById('setCount').textContent = data.length;
+
+  const summary = document.getElementById('tierSummary');
+  summary.innerHTML = `
+    <span><span class="tier-dot" style="background:var(--wasteland)"></span>${counts.must} must</span>
+    <span><span class="tier-dot" style="background:var(--casa)"></span>${counts.want} want</span>
+    <span><span class="tier-dot" style="background:var(--text-dim)"></span>${counts.maybe} maybe</span>
+  `;
+
+  detectConflicts(currentDay);
+}
+
+// ============================================
+// DAY TABS
+// ============================================
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentDay = parseInt(tab.dataset.day);
+
+    // All days have verified data
+    document.getElementById('tbaBanner').classList.remove('show');
+
+    renderGrid(currentDay);
+    updateUI();
+    startNowLine(currentDay);
+  });
+});
+
+// ============================================
+// VIEW TOGGLE
+// ============================================
+document.getElementById('viewToggle').addEventListener('click', () => {
+  myScheduleOnly = !myScheduleOnly;
+  document.getElementById('viewToggle').classList.toggle('active', myScheduleOnly);
+  gridWrap.classList.toggle('my-schedule', myScheduleOnly);
+});
+
+// ============================================
+// SEARCH
+// ============================================
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  applySearch(e.target.value);
+});
+
+function applySearch(query) {
+  query = query || document.getElementById('searchInput').value;
+  const q = query.toLowerCase().trim();
+  document.querySelectorAll('.set').forEach(el => {
+    const artist = el.querySelector('.artist').textContent.toLowerCase();
+    const genre = (el.querySelector('.genre')?.textContent || '').toLowerCase();
+    if (!q) {
+      el.classList.remove('search-match', 'search-hide');
+    } else if (artist.includes(q) || genre.includes(q)) {
+      el.classList.add('search-match');
+      el.classList.remove('search-hide');
+    } else {
+      el.classList.add('search-hide');
+      el.classList.remove('search-match');
+    }
+  });
+}
+
+// ============================================
+// RESET
+// ============================================
+document.getElementById('resetBtn').addEventListener('click', () => {
+  const count = Object.values(selections[currentDay] || {}).filter(t => t !== 'off').length;
+  if (count === 0) return;
+  if (!confirm(`Clear all ${count} selections for Day ${currentDay}?`)) return;
+  selections[currentDay] = {};
+  persist();
+  renderGrid(currentDay);
+  updateUI();
+});
+
+// ============================================
+// EXPORT MENU
+// ============================================
+document.getElementById('exportBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('exportMenu').classList.toggle('show');
+});
+document.addEventListener('click', () => {
+  document.getElementById('exportMenu').classList.remove('show');
+});
+
+// ============================================
+// PNG EXPORT
+// ============================================
+function exportPNG(fullGrid) {
+  const wasMySchedule = myScheduleOnly;
+  if (!fullGrid) {
+    gridWrap.classList.add('my-schedule');
+  } else {
+    gridWrap.classList.remove('my-schedule');
+  }
+
+  html2canvas(gridWrap, {
+    backgroundColor: '#08080f',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `edc2026-day${currentDay}-${fullGrid?'full':'myschedule'}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+
+    if (wasMySchedule) gridWrap.classList.add('my-schedule');
+    else gridWrap.classList.remove('my-schedule');
+  });
+}
+
+// ============================================
+// ICS EXPORT
+// ============================================
+function exportICS() {
+  const data = LINEUP[currentDay] || [];
+  const picks = data.filter(s => {
+    const t = getTier(currentDay, setKey(s));
+    return t === 'must' || t === 'want';
+  });
+
+  if (!picks.length) { alert('No picks to export!'); return; }
+
+  const dates = ['20260515','20260516','20260517'];
+  let ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//EDC LV 2026//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n`;
+
+  picks.forEach(s => {
+    // Parse start/end as 24h, advance date if AM (past midnight)
+    function toDateTime(t, baseDate) {
+      const m = t.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+      let h = parseInt(m[1]);
+      const min = m[2];
+      const ampm = m[3].toLowerCase();
+      if (ampm === 'pm' && h !== 12) h += 12;
+      if (ampm === 'am' && h === 12) h = 0;
+      // AM times (0-11) are after midnight → next calendar day
+      const date = (ampm === 'am' && h < 12)
+        ? String(parseInt(baseDate) + 1)
+        : baseDate;
+      return `${date}T${String(h).padStart(2,'0')}${min}00`;
+    }
+    const baseDate = dates[currentDay - 1];
+    const startDT = toDateTime(s.start, baseDate);
+    const endDT = toDateTime(s.end, baseDate);
+    const stage = STAGES.find(st => st.id === s.stage)?.name || s.stage;
+    ics += `BEGIN:VEVENT\r\nUID:${setKey(s)}@edc2026\r\nDTSTART;TZID=America/Los_Angeles:${startDT}\r\nDTEND;TZID=America/Los_Angeles:${endDT}\r\nSUMMARY:${s.artist} @ ${stage}\r\nDESCRIPTION:Stage: ${stage}\\nGenre: ${s.genre || 'N/A'}\\nTier: ${getTier(currentDay, setKey(s))}\r\nLOCATION:Las Vegas Motor Speedway - ${stage}\r\nEND:VEVENT\r\n`;
+  });
+
+  ics += 'END:VCALENDAR';
+
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const link = document.createElement('a');
+  link.download = `edc2026-day${currentDay}.ics`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+}
+
+// ============================================
+// SHARE URL
+// ============================================
+function copyShareURL() {
+  const payload = { selections, notes, day: currentDay };
+  const hash = btoa(encodeURIComponent(JSON.stringify(payload)));
+  const url = `${location.origin}${location.pathname}#share=${hash}`;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Share link copied to clipboard!');
+  }).catch(() => {
+    prompt('Copy this link:', url);
+  });
+}
+
+// ============================================
+// STAGE WALK TIMES (minutes, approximate EDC map)
+// ============================================
+const WALK_TIMES = {
+  'kinetic|circuit':3,  'kinetic|cosmic':4,   'kinetic|basspod':6,
+  'kinetic|neon-garden':9, 'kinetic|quantum':7, 'kinetic|wasteland':13,
+  'kinetic|stereobloom':9, 'kinetic|bionic':11, 'kinetic|casa':10,
+  'kinetic|forest':13,  'kinetic|yeedc':12,   'kinetic|beatbox':8,
+  'kinetic|insomniac':10,
+  'circuit|cosmic':5,   'circuit|basspod':4,  'circuit|neon-garden':7,
+  'circuit|quantum':8,  'circuit|wasteland':11, 'circuit|stereobloom':8,
+  'circuit|bionic':9,   'circuit|casa':9,     'circuit|forest':12,
+  'circuit|yeedc':11,   'circuit|beatbox':6,  'circuit|insomniac':8,
+  'cosmic|basspod':6,   'cosmic|neon-garden':8, 'cosmic|quantum':9,
+  'cosmic|wasteland':12, 'cosmic|stereobloom':10, 'cosmic|bionic':8,
+  'cosmic|casa':11,     'cosmic|forest':11,   'cosmic|yeedc':13,
+  'basspod|neon-garden':5, 'basspod|quantum':7, 'basspod|wasteland':9,
+  'basspod|stereobloom':7, 'basspod|bionic':7, 'basspod|casa':8,
+  'basspod|forest':10,  'basspod|yeedc':10,   'basspod|beatbox':5,
+  'neon-garden|quantum':6, 'neon-garden|wasteland':8, 'neon-garden|stereobloom':9,
+  'neon-garden|bionic':6, 'neon-garden|casa':7, 'neon-garden|forest':9,
+  'quantum|wasteland':9, 'quantum|stereobloom':10, 'quantum|bionic':8,
+  'wasteland|stereobloom':7, 'wasteland|bionic':9, 'wasteland|beatbox':7,
+  'stereobloom|bionic':6, 'stereobloom|casa':7, 'stereobloom|forest':8,
+  'bionic|casa':5,      'bionic|forest':7,    'bionic|beatbox':6,
+  'casa|forest':4,      'casa|yeedc':6,       'forest|yeedc':5,
+};
+function getWalkMins(a, b) {
+  if (a === b) return 0;
+  return WALK_TIMES[`${a}|${b}`] || WALK_TIMES[`${b}|${a}`] || 8;
+}
+
+// ============================================
+// NOW LINE
+// ============================================
+let nowLineInterval = null;
+
+function getNowOffsetPx(day) {
+  const cfg = DAY_CONFIG[day];
+  const now = new Date();
+  // Convert Las Vegas time (UTC-7 during May)
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const lv = new Date(utc + -7 * 3600000);
+  let nowMin = lv.getHours() * 60 + lv.getMinutes();
+  // Treat 0–5:30 as next-day (past midnight)
+  if (nowMin < 6 * 60) nowMin += 24 * 60;
+  const offsetMin = nowMin - cfg.startMin;
+  const totalMin = cfg.endMin - cfg.startMin;
+  if (offsetMin < 0 || offsetMin > totalMin) return null;
+  return offsetMin * cfg.pxPerMin;
+}
+
+function formatNowLabel() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const lv = new Date(utc + -7 * 3600000);
+  let h = lv.getHours(), m = lv.getMinutes();
+  const ampm = h >= 12 ? 'AM' : 'AM';
+  const disp = h % 12 || 12;
+  return `${disp}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'} NOW`;
+}
+
+function renderNowLine(day) {
+  document.querySelectorAll('.now-line, .now-label').forEach(el => el.remove());
+  const px = getNowOffsetPx(day);
+  if (px === null) return;
+
+  // Add to time column
+  const timeCol = document.querySelector('.time-col');
+  if (timeCol) {
+    const label = document.createElement('div');
+    label.className = 'now-label';
+    label.style.top = (px + 11) + 'px';
+    label.textContent = formatNowLabel();
+    timeCol.appendChild(label);
+  }
+
+  // Add to each stage column
+  document.querySelectorAll('.stage-col').forEach(col => {
+    const line = document.createElement('div');
+    line.className = 'now-line';
+    line.style.top = px + 'px';
+    col.appendChild(line);
+  });
+}
+
+function startNowLine(day) {
+  if (nowLineInterval) clearInterval(nowLineInterval);
+  renderNowLine(day);
+  nowLineInterval = setInterval(() => renderNowLine(day), 60000);
+}
+
+// ============================================
+// TRAVEL / ROUTE PANEL
+// ============================================
+document.getElementById('routeBtn').addEventListener('click', () => {
+  buildRoutePanel();
+  document.getElementById('travelOverlay').classList.add('show');
+});
+document.getElementById('travelOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('travelOverlay'))
+    document.getElementById('travelOverlay').classList.remove('show');
+});
+
+function buildRoutePanel() {
+  const data = LINEUP[currentDay] || [];
+  const picks = data
+    .filter(s => {
+      const t = getTier(currentDay, setKey(s));
+      return t === 'must' || t === 'want';
+    })
+    .map(s => ({ ...s, startMinAbs: parseTime(s.start, currentDay) + DAY_CONFIG[currentDay].startMin }))
+    .sort((a, b) => a.startMinAbs - b.startMinAbs);
+
+  const content = document.getElementById('travelContent');
+  document.getElementById('travelSub').textContent =
+    `Day ${currentDay} · ${picks.length} pick${picks.length !== 1 ? 's' : ''} in time order`;
+
+  if (!picks.length) {
+    content.innerHTML = `<div class="travel-empty">No must/want picks yet.<br>Tap sets to add them.</div>`;
+    return;
+  }
+
+  let html = '';
+  picks.forEach((s, i) => {
+    const stage = STAGES.find(st => st.id === s.stage);
+    const tier = getTier(currentDay, setKey(s));
+    const tierIcon = tier === 'must' ? '♥' : '★';
+    html += `
+      <div class="travel-item">
+        <div class="travel-dot" style="background:${stage?.color || '#fff'}"></div>
+        <div class="travel-info">
+          <div class="travel-artist">${tierIcon} ${s.artist}</div>
+          <div class="travel-meta">${stage?.name || s.stage} · ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+        </div>
+      </div>`;
+
+    if (i < picks.length - 1) {
+      const next = picks[i + 1];
+      const walkMins = getWalkMins(s.stage, next.stage);
+      const gap = next.startMinAbs - s.startMinAbs - (parseTime(s.end, currentDay) - parseTime(s.start, currentDay));
+      const isSameStage = s.stage === next.stage;
+
+      if (isSameStage) {
+        html += `<div class="travel-walk">↕ Same stage</div>`;
+      } else {
+        const cls = gap < walkMins ? 'conflict' : gap < walkMins + 5 ? 'tight' : '';
+        const icon = gap < walkMins ? '⚠️' : '🚶';
+        const note = gap < walkMins
+          ? `only ${gap} min gap — might miss start`
+          : gap < walkMins + 5 ? 'tight — head over early' : '';
+        html += `<div class="travel-walk ${cls}">${icon} ~${walkMins} min walk${note ? ` · ${note}` : ''}</div>`;
+      }
+    }
+  });
+
+  content.innerHTML = html;
+}
+
+// ============================================
+// INIT
+// ============================================
+loadState();
+renderGrid(currentDay);
+updateUI();
+startNowLine(currentDay);
+</script>
+
+</body>
+</html>
