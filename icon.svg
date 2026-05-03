@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d0818"/>
+      <stop offset="100%" stop-color="#08080f"/>
+    </linearGradient>
+    <radialGradient id="eyeL" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#00d9ff"/>
+      <stop offset="70%" stop-color="#7b2fff"/>
+      <stop offset="100%" stop-color="#3a0080"/>
+    </radialGradient>
+    <radialGradient id="eyeR" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#ff2a6d"/>
+      <stop offset="70%" stop-color="#b026ff"/>
+      <stop offset="100%" stop-color="#3a0080"/>
+    </radialGradient>
+    <linearGradient id="headGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a1a4a"/>
+      <stop offset="100%" stop-color="#130d22"/>
+    </linearGradient>
+    <linearGradient id="edcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff2a6d"/>
+      <stop offset="50%" stop-color="#b026ff"/>
+      <stop offset="100%" stop-color="#00d9ff"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a6d"/>
+      <stop offset="33%" stop-color="#b026ff"/>
+      <stop offset="66%" stop-color="#00d9ff"/>
+      <stop offset="100%" stop-color="#39ff14"/>
+    </linearGradient>
+    <filter id="eyeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg)" rx="90"/>
+
+  <!-- Outer decorative ring -->
+  <circle cx="256" cy="256" r="230" fill="none" stroke="url(#ringGrad)" stroke-width="2" opacity="0.35"/>
+
+  <!-- Decorative dots -->
+  <g opacity="0.55">
+    <circle cx="256" cy="28" r="3" fill="#ff2a6d"/>
+    <circle cx="354" cy="56" r="2" fill="#b026ff"/>
+    <circle cx="456" cy="154" r="2.5" fill="#00d9ff"/>
+    <circle cx="484" cy="256" r="3" fill="#39ff14"/>
+    <circle cx="456" cy="358" r="2" fill="#00d9ff"/>
+    <circle cx="354" cy="456" r="2.5" fill="#b026ff"/>
+    <circle cx="256" cy="484" r="3" fill="#ff2a6d"/>
+    <circle cx="158" cy="456" r="2" fill="#39ff14"/>
+    <circle cx="56" cy="358" r="2.5" fill="#ff2a6d"/>
+    <circle cx="28" cy="256" r="3" fill="#b026ff"/>
+    <circle cx="56" cy="154" r="2" fill="#00d9ff"/>
+    <circle cx="158" cy="56" r="2.5" fill="#ff2a6d"/>
+  </g>
+
+  <!-- Owl body -->
+  <ellipse cx="256" cy="330" rx="85" ry="68" fill="#0f0a1c"/>
+
+  <!-- Wings -->
+  <path d="M 171 288 Q 118 345 140 402 Q 178 372 192 328 Z" fill="#150c28"/>
+  <path d="M 341 288 Q 394 345 372 402 Q 334 372 320 328 Z" fill="#150c28"/>
+
+  <!-- Wing edge highlights -->
+  <path d="M 173 293 Q 130 342 146 392" fill="none" stroke="#ff2a6d" stroke-width="1.5" opacity="0.35"/>
+  <path d="M 339 293 Q 382 342 366 392" fill="none" stroke="#00d9ff" stroke-width="1.5" opacity="0.35"/>
+
+  <!-- Owl head -->
+  <ellipse cx="256" cy="208" rx="107" ry="102" fill="url(#headGrad)"/>
+
+  <!-- Ear tufts left -->
+  <path d="M 174 146 L 162 84 L 206 132 Z" fill="#1c1030"/>
+  <path d="M 177 143 L 167 96 L 204 135 Z" fill="#251540"/>
+  <line x1="173" y1="146" x2="167" y2="98" stroke="#ff2a6d" stroke-width="1.2" opacity="0.45"/>
+
+  <!-- Ear tufts right -->
+  <path d="M 338 146 L 350 84 L 306 132 Z" fill="#1c1030"/>
+  <path d="M 335 143 L 345 96 L 308 135 Z" fill="#251540"/>
+  <line x1="339" y1="146" x2="345" y2="98" stroke="#00d9ff" stroke-width="1.2" opacity="0.45"/>
+
+  <!-- Facial disc -->
+  <ellipse cx="256" cy="216" rx="90" ry="84" fill="#110820" opacity="0.75"/>
+
+  <!-- Eye sockets -->
+  <circle cx="212" cy="208" r="45" fill="#08040f"/>
+  <circle cx="300" cy="208" r="45" fill="#08040f"/>
+
+  <!-- Eye outer rings -->
+  <circle cx="212" cy="208" r="41" fill="none" stroke="#7b2fff" stroke-width="2.5" opacity="0.65"/>
+  <circle cx="300" cy="208" r="41" fill="none" stroke="#ff2a6d" stroke-width="2.5" opacity="0.65"/>
+
+  <!-- Eye irises with glow -->
+  <circle cx="212" cy="208" r="32" fill="url(#eyeL)" filter="url(#eyeGlow)"/>
+  <circle cx="300" cy="208" r="32" fill="url(#eyeR)" filter="url(#eyeGlow)"/>
+
+  <!-- Pupils -->
+  <circle cx="212" cy="208" r="13" fill="#000"/>
+  <circle cx="300" cy="208" r="13" fill="#000"/>
+
+  <!-- Eye shines -->
+  <circle cx="205" cy="200" r="5.5" fill="white" opacity="0.9"/>
+  <circle cx="219" cy="217" r="2.5" fill="white" opacity="0.45"/>
+  <circle cx="293" cy="200" r="5.5" fill="white" opacity="0.9"/>
+  <circle cx="307" cy="217" r="2.5" fill="white" opacity="0.45"/>
+
+  <!-- Beak -->
+  <path d="M 242 242 L 256 264 L 270 242 Q 256 237 242 242 Z" fill="#c4a840"/>
+  <path d="M 244 242 L 256 258 L 268 242 Q 256 239 244 242 Z" fill="#e8cc55"/>
+  <line x1="242" y1="252" x2="270" y2="252" stroke="#9a8030" stroke-width="1"/>
+
+  <!-- Chest feathers -->
+  <path d="M 198 338 Q 227 318 256 333 Q 285 318 314 338" fill="none" stroke="#ff2a6d" stroke-width="1.5" opacity="0.22"/>
+  <path d="M 208 358 Q 232 344 256 353 Q 280 344 304 358" fill="none" stroke="#b026ff" stroke-width="1.5" opacity="0.18"/>
+  <path d="M 218 376 Q 237 367 256 372 Q 275 367 294 376" fill="none" stroke="#00d9ff" stroke-width="1.2" opacity="0.16"/>
+
+  <!-- LAS VEGAS text -->
+  <text x="256" y="412" text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-weight="400" font-size="20"
+    fill="#ffffff" letter-spacing="7" opacity="0.4">LAS VEGAS</text>
+
+  <!-- Divider -->
+  <line x1="118" y1="420" x2="394" y2="420" stroke="url(#ringGrad)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- EDC text glow layer -->
+  <text x="256" y="470" text-anchor="middle"
+    font-family="'Arial Black', 'Impact', sans-serif"
+    font-weight="900" font-size="86"
+    fill="url(#edcGrad)" letter-spacing="8"
+    filter="url(#textGlow)" opacity="0.45">EDC</text>
+
+  <!-- EDC text solid layer -->
+  <text x="256" y="470" text-anchor="middle"
+    font-family="'Arial Black', 'Impact', sans-serif"
+    font-weight="900" font-size="86"
+    fill="url(#edcGrad)" letter-spacing="8">EDC</text>
+
+</svg>

@@ -1,0 +1,20 @@
+{
+  "name": "EDC Las Vegas 2026",
+  "short_name": "EDC 2026",
+  "description": "EDC Las Vegas 2026 Set Tracker — plan your schedule, find friends, get reminders",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08080f",
+  "theme_color": "#08080f",
+  "categories": ["entertainment", "music"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
