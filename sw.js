@@ -1,9 +1,10 @@
-const CACHE = 'edc2026-v1';
+const CACHE = 'edc2026-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
+  './icon.png',
+  './edc-header.png',
 ];
 
 // Install: cache app shell
