@@ -1,0 +1,4031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>EDC Las Vegas 2026 — Set Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#08080f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EDC 2026">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg: #08080f; --bg-2: #0f0f1a; --bg-3: #161624; --bg-4: #1e1e2f;
+  --line: rgba(255,255,255,0.04); --line-medium: rgba(255,255,255,0.08); --line-strong: rgba(255,255,255,0.14);
+  --text: #f0f0f5; --text-dim: #a0a8b8; --text-muted: #6b7280; --text-faint: #4b5563;
+  --col-width: 168px; --time-col-width: 68px; --hour-height: 110px; --header-height: 52px;
+  --stage-color: #ff2a6d; --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+  --space-xs: 4px; --space-sm: 8px; --space-md: 12px; --space-lg: 16px; --space-xl: 20px;
+  --wasteland: #ff003c; --casa: #ffd60a; --kinetic: #ff2a6d;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; height: 100dvh; }
+body {
+  background: var(--bg); color: var(--text); font-family: 'DM Sans', -apple-system, sans-serif;
+  overflow: hidden; display: flex; flex-direction: column; text-transform: uppercase;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.4;
+}
+/* ── Option A Layout ── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+/* ── Option H: Bottom Sheet Layout ── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  position: relative;
+}
+.grid-container {
+  flex: 1;
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  position: relative;
+}
+.grid-container::-webkit-scrollbar { display: none; }
+.bottom-sheet {
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--bg) 97%, transparent);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--line-strong);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 50;
+}
+.sheet-handle-area {
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px 0 2px; cursor: pointer; flex-shrink: 0;
+}
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.15); border-radius: 2px;
+}
+.sheet-peek { display: flex; flex-direction: column; flex-shrink: 0; }
+.sheet-row1 {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 12px 6px;
+}
+.sheet-day-tabs { display: flex; gap: 5px; flex: 1; }
+.sheet-day-tabs .day-tab {
+  flex: 1; height: 46px;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 10px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; user-select: none; transition: all 0.15s;
+}
+.day-tab-label {
+  font-family: 'Outfit', sans-serif; font-weight: 900;
+  font-size: 15px; color: #444455; letter-spacing: 0.03em; line-height: 1;
+}
+.day-tab-date {
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  color: #333348; letter-spacing: 0.05em;
+}
+.sheet-day-tabs .day-tab:hover:not(.active) { border-color: var(--line-strong); }
+.sheet-day-tabs .day-tab.active { background: #fff; border-color: #fff; }
+.sheet-day-tabs .day-tab.active .day-tab-label { color: var(--bg); }
+.sheet-day-tabs .day-tab.active .day-tab-date  { color: rgba(0,0,0,0.4); }
+.sheet-counters { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+.hc-pill {
+  display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px;
+  border-radius: 999px; border: 1px solid transparent; line-height: 1;
+}
+.hc-icon { font-family: system-ui, sans-serif; font-size: 9px; font-weight: 700; }
+.hc-num  { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 13px; }
+.hc-pill.must { background: rgba(255,20,147,0.1); border-color: rgba(255,20,147,0.25); color: #ff1493; }
+.hc-pill.want { background: rgba(255,214,10,0.1); border-color: rgba(255,214,10,0.25); color: #ffd60a; }
+.hc-pill.part { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.10); color: #8888a0; }
+.sheet-row2 {
+  display: flex; gap: 5px; padding: 0 12px 6px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.sheet-row2::-webkit-scrollbar { display: none; }
+.qa-btn {
+  flex: 1; min-width: 0; height: 32px; border-radius: 16px;
+  border: 1px solid var(--line); background: var(--bg-3);
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap; color: #555570;
+}
+.qa-btn.pink   { color: rgba(255,20,147,0.7);  border-color: rgba(255,20,147,0.2);  background: rgba(255,20,147,0.05); }
+.qa-btn.cyan   { color: rgba(0,217,255,0.7);   border-color: rgba(0,217,255,0.2);   background: rgba(0,217,255,0.05); }
+.qa-btn.green  { color: rgba(57,255,20,0.7);   border-color: rgba(57,255,20,0.2);   background: rgba(57,255,20,0.05); }
+.qa-btn.orange { color: rgba(255,136,0,0.7);   border-color: rgba(255,136,0,0.2);   background: rgba(255,136,0,0.05); }
+.qa-btn.active { background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.2); }
+.sheet-row3 {
+  display: flex; align-items: center; gap: 3px;
+  padding: 0 12px 8px; flex-wrap: nowrap; overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+.hi-w    { font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 700; color: #fff; white-space: nowrap; }
+.hi-arr  { font-family: 'DM Mono', monospace; font-size: 8.5px; color: #333348; }
+.hi-want { font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 700; color: #ffd60a; white-space: nowrap; }
+.hi-must { font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 700; color: #ff1493; white-space: nowrap; }
+.hi-part { font-family: 'DM Mono', monospace; font-size: 8.5px; font-weight: 700; color: #8888a0; white-space: nowrap; }
+.hi-dot  { font-family: 'DM Mono', monospace; font-size: 8.5px; color: #333348; margin: 0 2px; }
+.sheet-font-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 14px 8px; border-top: 1px solid var(--line);
+}
+.sheet-expanded {
+  display: none; flex-direction: column; gap: 14px;
+  padding: 14px 14px 20px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.bottom-sheet.expanded .sheet-expanded { display: flex; }
+.bottom-sheet.expanded .sheet-row3 { display: none; }
+.fab-backdrop {
+  position: fixed; inset: 0; z-index: 250;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+  display: none;
+}
+.fab-backdrop.show { display: block; }
+.fab-section { display: flex; flex-direction: column; gap: 6px; }
+.fab-section-label { font-family: 'DM Mono', monospace; font-size: 8px; font-weight: 700; color: #333348; letter-spacing: 0.1em; }
+.fab-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.fab-grid-2 .fab-tool { justify-content: center; width: 100%; }
+.fab-font-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0 2px; }
+.fab-tool {
+  height: 36px; padding: 0 12px;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.06em; color: var(--text-muted);
+  display: inline-flex; align-items: center; justify-content: flex-start; gap: 6px;
+  transition: all 0.15s; white-space: nowrap;
+}
+.fab-tool.active { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #fff; }
+
+/* banners */
+/* banners */
+.banner {
+  display: none; align-items: center; gap: 8px;
+  padding: 5px 12px; font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.04em; flex-shrink: 0;
+}
+.banner.show { display: flex; }
+.conflict-banner { background: color-mix(in srgb,var(--wasteland) 8%,var(--bg-2)); border-bottom: 1px solid color-mix(in srgb,var(--wasteland) 20%,transparent); color: var(--wasteland); }
+.tba-banner { background: color-mix(in srgb,var(--casa) 6%,var(--bg-2)); border-bottom: 1px solid color-mix(in srgb,var(--casa) 15%,transparent); color: var(--casa); }
+
+/* search + font shared styles */
+.search-wrap { position: relative; }
+.search-wrap input {
+  width: 100%; height: 30px; padding: 0 8px 0 24px; background: var(--bg-3);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--text-dim);
+  font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 0.05em;
+  text-transform: uppercase; outline: none; box-sizing: border-box;
+}
+.search-wrap input::placeholder { color: var(--text-faint); }
+.search-wrap::before { content: '🔍'; position: absolute; left: 7px; top: 50%; transform: translateY(-50%); font-size: 9px; opacity: 0.4; pointer-events: none; }
+.font-btns { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; height: 30px; }
+.font-btn { background: var(--bg-3); border: none; border-right: 1px solid var(--line); color: var(--text-muted); font-family: 'DM Sans', sans-serif; cursor: pointer; padding: 0 8px; font-size: 10px; height: 100%; transition: all 0.15s; }
+.font-btn:last-child { border-right: none; }
+.font-btn.active { background: var(--bg-4); color: #fff; }
+
+/* PROMINENT GRID */
+.grid-container {
+  flex: 1; overflow: auto; position: relative; -webkit-overflow-scrolling: touch; background: var(--bg);
+}
+.grid {
+  display: grid; grid-template-columns: var(--time-col-width) repeat(14, var(--col-width));
+  width: max-content; min-height: 100%;
+}
+.corner {
+  position: sticky; top: 0; left: 0; z-index: 8;
+  background: color-mix(in srgb, var(--bg) 95%, transparent); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line-strong); border-right: 1px solid var(--line-strong);
+  height: var(--header-height); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+}
+.corner-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--text-faint); letter-spacing: 0.08em; }
+.stage-header {
+  position: sticky; top: 0; background: color-mix(in srgb, var(--bg) 95%, transparent);
+  backdrop-filter: blur(12px); border-bottom: 1px solid var(--line-strong); border-right: 1px solid var(--line);
+  height: var(--header-height); display: flex; align-items: center; justify-content: center;
+  text-align: center; z-index: 6; padding: 4px 8px; overflow: hidden;
+}
+.stage-header .name {
+  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 0.04em;
+  text-transform: uppercase; line-height: 1.2; color: var(--stage-color);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--stage-color) 25%, transparent);
+}
+.time-col {
+  position: sticky; left: 0; z-index: 5;
+  background: color-mix(in srgb, var(--bg) 95%, transparent); backdrop-filter: blur(12px);
+  border-right: 1px solid var(--line-strong);
+}
+.time-marker {
+  position: absolute; left: 0; width: 100%; font-family: 'DM Sans', sans-serif;
+  font-weight: 600; font-size: 10px; color: var(--text-muted);
+  padding: 4px 8px 0 0; text-align: right; border-top: 1px solid var(--line-medium); letter-spacing: 0;
+}
+.time-marker.first { border-top: none; }
+
+/* Custom meet markers */
+.custom-marker-line {
+  position: absolute; left: 0; right: 0; height: 1px;
+  pointer-events: none; z-index: 7;
+  border-top: 1.5px dashed;
+}
+.custom-marker-pill {
+  position: absolute; left: 2px; right: 2px;
+  height: 18px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  font-family: 'DM Mono', monospace; font-size: 8px; font-weight: 700;
+  letter-spacing: 0.04em; cursor: pointer; z-index: 8;
+  border: 1px solid; white-space: nowrap; overflow: hidden;
+  transition: opacity 0.15s;
+}
+.custom-marker-pill:hover { opacity: 0.8; }
+
+/* Marker modal */
+.marker-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: none; align-items: flex-end; justify-content: center;
+}
+.marker-modal-backdrop.show { display: flex; }
+.marker-modal {
+  background: var(--bg-2); border: 1px solid var(--line-medium);
+  border-radius: 20px 20px 0 0; padding: 20px 20px 32px;
+  width: 100%; max-width: 480px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.marker-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.marker-modal-title {
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700;
+  color: var(--text-muted); letter-spacing: 0.08em;
+}
+.marker-modal-close {
+  background: none; border: none; color: var(--text-faint);
+  font-size: 18px; cursor: pointer; padding: 4px 8px;
+}
+.marker-modal-time-row {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+}
+.marker-modal-time {
+  font-family: 'Outfit', sans-serif; font-weight: 900;
+  font-size: 48px; color: var(--text); letter-spacing: 0.02em;
+  line-height: 1; text-align: center; min-width: 160px;
+}
+.marker-time-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-3); border: 1px solid var(--line-medium);
+  color: var(--text-dim); font-size: 20px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; line-height: 1;
+}
+.marker-time-btn:active { background: var(--bg-4); transform: scale(0.92); }
+  font-family: 'Outfit', sans-serif; font-weight: 900;
+  font-size: 28px; color: var(--text); letter-spacing: 0.02em;
+}
+.marker-modal input[type=text] {
+  width: 100% !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 22px !important;
+  padding: 0 18px;
+  outline: none;
+  letter-spacing: 0.02em;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  -webkit-appearance: none;
+}
+.marker-modal input[type=text]:focus { border-color: var(--line-strong); }
+.marker-modal input[type=text]::placeholder { color: var(--text-faint); font-size: 16px; font-weight: 400; }
+.marker-color-row {
+  display: flex; gap: 8px; align-items: center;
+}
+.marker-color-swatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; border: 2px solid transparent;
+  transition: transform 0.15s; flex-shrink: 0;
+}
+.marker-color-swatch.active { border-color: #fff; transform: scale(1.15); }
+.marker-modal-actions {
+  display: flex; gap: 8px;
+}
+.marker-btn {
+  flex: 1; height: 44px; border-radius: 10px; border: none;
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.06em; cursor: pointer; transition: all 0.15s;
+}
+.marker-btn.save { background: var(--kinetic); color: #000; }
+.marker-btn.delete { background: var(--bg-3); color: var(--wasteland); border: 1px solid rgba(255,0,60,0.3); }
+.marker-btn.cancel { background: var(--bg-3); color: var(--text-muted); }
+.stage-col {
+  position: relative; border-right: 1px solid var(--line);
+  background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 100% var(--hour-height);
+}
+
+/* SET BLOCKS */
+.set {
+  position: absolute; left: 4px; right: 4px; border-radius: var(--radius-sm);
+  padding: 8px 9px 7px; overflow: hidden;
+  background: color-mix(in srgb, var(--stage-color) 5%, var(--bg));
+  border: 1px solid transparent; z-index: 2;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.set:hover { transform: translateY(-1px) scale(1.01); z-index: 4; }
+.set:active { transform: scale(0.98); }
+.set .artist {
+  font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 11.5px;
+  color: #9090a0; line-height: 1.25; margin-bottom: 4px; letter-spacing: -0.01em;
+  transition: color 0.18s ease; display: block;
+}
+.set .artist .b2b {
+  font-size: 7px; font-weight: 600; letter-spacing: 0.04em; opacity: 0.7;
+  vertical-align: middle; margin: 0 2px; white-space: nowrap;
+}
+.set .time {
+  font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 10px;
+  color: #606070; letter-spacing: 0;
+}
+.set .genre {
+  font-family: 'DM Mono', monospace; font-size: 8px; color: #505060;
+  margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.set.tier-maybe {
+  background: color-mix(in srgb, var(--stage-color) 25%, var(--bg));
+  border-color: color-mix(in srgb, var(--stage-color) 35%, transparent);
+}
+.set.tier-maybe .artist { color: color-mix(in srgb, var(--stage-color) 60%, var(--text-dim)); }
+.set.tier-maybe .time { color: var(--text-muted); opacity: 0.7; }
+.set.tier-maybe::after {
+  content: '?'; position: absolute; top: 5px; right: 6px;
+  font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 9px;
+  color: var(--stage-color); background: color-mix(in srgb, var(--stage-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--stage-color) 25%, transparent);
+  border-radius: 999px; padding: 1px 5px; line-height: 1.4; opacity: 0.8;
+}
+.set.tier-want {
+  background: color-mix(in srgb, var(--stage-color) 55%, var(--bg));
+  border-color: color-mix(in srgb, var(--stage-color) 60%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--stage-color) 20%, transparent),
+              0 0 16px color-mix(in srgb, var(--stage-color) 8%, transparent);
+}
+.set.tier-want .artist { color: #ffffff; font-weight: 900; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.set.tier-want .time { color: rgba(255,255,255,0.75); }
+.set.tier-want::after {
+  content: '★'; position: absolute; bottom: 5px; right: 6px;
+  font-family: system-ui, sans-serif; font-weight: 400; font-size: 8px;
+  color: var(--stage-color); background: color-mix(in srgb, var(--stage-color) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--stage-color) 30%, transparent);
+  border-radius: 999px; padding: 1px 5px; line-height: 1.4;
+}
+.set.tier-must {
+  background: var(--stage-color); border-color: var(--stage-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--stage-color) 50%, transparent),
+              0 0 25px color-mix(in srgb, var(--stage-color) 25%, transparent),
+              0 0 45px color-mix(in srgb, var(--stage-color) 10%, transparent),
+              inset 0 0 12px rgba(255,255,255,0.12);
+  z-index: 3;
+}
+.set.tier-must .artist { color: #000000; font-weight: 900; text-shadow: none; }
+.set.tier-must .time { color: rgba(0,0,0,0.7); }
+.set.tier-must .genre { color: rgba(0,0,0,0.5); }
+.set.tier-must::after {
+  content: '♥'; position: absolute; bottom: 5px; right: 6px;
+  font-family: system-ui, sans-serif; font-weight: 700; font-size: 9px;
+  color: #ff1a5e; background: rgba(255,255,255,0.9); border: none;
+  border-radius: 999px; padding: 2px 6px; line-height: 1.4;
+}
+.set.tier-must.conflict {
+  border-color: var(--wasteland);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--wasteland) 50%, transparent),
+              0 0 25px color-mix(in srgb, var(--wasteland) 25%, transparent),
+              inset 0 0 12px rgba(255,255,255,0.12);
+  animation: pulseConflict 2s ease-in-out infinite;
+}
+@keyframes pulseConflict {
+  0%, 100% { box-shadow: 0 0 10px color-mix(in srgb, var(--wasteland) 50%, transparent), 0 0 25px color-mix(in srgb, var(--wasteland) 25%, transparent), inset 0 0 12px rgba(255,255,255,0.12); }
+  50% { box-shadow: 0 0 15px color-mix(in srgb, var(--wasteland) 70%, transparent), 0 0 35px color-mix(in srgb, var(--wasteland) 40%, transparent), inset 0 0 12px rgba(255,255,255,0.12); }
+}
+.set.tier-part {
+  background: color-mix(in srgb, var(--stage-color) 15%, var(--bg));
+  border: 1px dashed color-mix(in srgb, var(--stage-color) 50%, transparent);
+}
+.set.tier-part .artist { color: #ffffff; opacity: 1; }
+.set.tier-part .time { color: rgba(255,255,255,0.6); }
+.set.tier-part::after {
+  content: '◑'; position: absolute; bottom: 5px; right: 6px;
+  font-family: system-ui, sans-serif; font-weight: 700; font-size: 9px;
+  color: var(--stage-color); background: color-mix(in srgb, var(--stage-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--stage-color) 30%, transparent);
+  border-radius: 999px; padding: 1px 5px; line-height: 1.4;
+}
+.my-schedule .set.tier-off { opacity: 0.05; pointer-events: none; }
+.my-schedule .set.tier-want { opacity: 0.65; }
+.my-schedule .set.tier-part { opacity: 0.6; }
+.note-dot {
+  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor; opacity: 0.6; margin-left: 5px;
+  vertical-align: middle; position: relative; top: -1px;
+}
+.set.search-match { border-color: var(--text) !important; box-shadow: 0 0 8px rgba(255,255,255,0.15); }
+.set.search-hide { opacity: 0.06; }
+.now-line {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: rgba(255,255,255,0.85); z-index: 6; pointer-events: none;
+}
+.now-line::before {
+  content: ''; position: absolute; left: -1px; top: -4px;
+  width: 10px; height: 10px; border-radius: 50%; background: #fff;
+}
+.now-label {
+  position: absolute; left: 0; width: 100%; font-family: 'DM Sans', sans-serif;
+  font-weight: 700; font-size: 9px; color: #fff; text-align: right;
+  padding-right: 8px; top: -12px; letter-spacing: 0; pointer-events: none; white-space: nowrap;
+}
+/* Fireworks marker */
+.fireworks-canvas {
+  position: absolute; left: 0; right: 0;
+  pointer-events: none; z-index: 6;
+}
+.fireworks-label {
+  position: absolute; left: 0; width: 100%;
+  font-family: 'DM Mono', monospace; font-weight: 700;
+  font-size: 8px; color: #ffdd00;
+  text-align: right; padding-right: 8px;
+  top: -12px; letter-spacing: 0.06em;
+  pointer-events: none; white-space: nowrap;
+  text-shadow: 0 0 8px rgba(255,220,0,0.6);
+}
+.scroll-hint {
+  position: fixed; bottom: 16px; right: 16px; background: var(--bg-3);
+  border: 1px solid var(--line); color: var(--text-muted);
+  font-family: 'DM Mono', monospace; font-size: 9px; padding: 6px 12px;
+  border-radius: 999px; letter-spacing: 0.08em; text-transform: uppercase;
+  pointer-events: none; z-index: 50;
+  animation: hintFade 4s ease-in-out 1s forwards;
+}
+@keyframes hintFade { to { opacity: 0; transform: translateY(8px); } }
+
+.fab {
+  position: fixed; bottom: 24px; right: 20px; z-index: 300;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--kinetic); border: none; color: #000;
+  font-size: 22px; font-weight: 900; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255,20,147,0.35);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.fab:hover { box-shadow: 0 6px 28px rgba(255,20,147,0.5); }
+.fab.open { transform: rotate(45deg); background: #fff; }
+.fab-backdrop {
+  position: fixed; inset: 0; z-index: 250; background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(6px); display: none;
+}
+.fab-backdrop.show { display: block; }
+.fab-menu {
+  position: fixed; bottom: 88px; left: 16px; right: 16px; z-index: 290;
+  background: var(--bg-2); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-lg); padding: var(--space-lg);
+  display: none; flex-direction: column; gap: var(--space-lg);
+  max-height: 70vh; overflow-y: auto; box-shadow: 0 -8px 48px rgba(0,0,0,0.5);
+}
+.fab-menu.show { display: flex; }
+.fab-section { display: flex; flex-direction: column; gap: var(--space-sm); }
+.fab-section-label {
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+  color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase;
+}
+.export-menu {
+  position: absolute; top: calc(100% + 4px); right: 0; background: var(--bg-3);
+  border: 1px solid var(--line-medium); border-radius: var(--radius-md);
+  padding: 4px; display: none; flex-direction: column; gap: 2px;
+  min-width: 180px; z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.export-menu.show { display: flex; }
+.export-menu button {
+  background: transparent; border: none; color: var(--text-muted);
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 12px;
+  border-radius: var(--radius-sm); cursor: pointer; text-align: left;
+  transition: all 0.15s; white-space: nowrap;
+}
+.export-menu button:hover { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+
+.modal-overlay, .panel-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px); z-index: 1000; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.show, .panel-overlay.show { display: flex; }
+.panel-overlay { align-items: flex-end; justify-content: center; padding: 0; }
+.modal {
+  background: var(--bg-3); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-lg); padding: var(--space-xl);
+  width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.modal h3 { font-family: 'Outfit', sans-serif; font-size: 16px; margin-bottom: var(--space-md); color: var(--text); }
+.modal textarea {
+  width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius-md); color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; resize: vertical; min-height: 80px; outline: none;
+}
+.modal textarea:focus { border-color: var(--line-strong); }
+.modal-buttons {
+  display: flex; gap: var(--space-sm); justify-content: flex-end; margin-top: var(--space-md);
+}
+.modal-buttons button {
+  padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--line);
+  background: var(--bg-2); color: var(--text-dim); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer; transition: all 0.15s;
+}
+.modal-buttons button.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+.modal-buttons button:hover { border-color: var(--line-strong); color: var(--text); }
+.sheet-panel {
+  background: var(--bg-2); border: 1px solid var(--line-medium);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: var(--space-xl);
+  width: 100%; max-width: 560px; max-height: 80vh; overflow-y: auto;
+  -webkit-overflow-scrolling: touch; box-shadow: 0 -8px 48px rgba(0,0,0,0.4);
+}
+.sheet-panel h2 { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 18px; color: #fff; margin-bottom: 4px; }
+.sheet-panel .panel-sub {
+  font-size: 10px; color: var(--text-muted); margin-bottom: var(--space-lg);
+  font-family: 'DM Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.sheet-close {
+  float: right; background: transparent; border: none; color: var(--text-muted);
+  font-size: 18px; cursor: pointer; padding: 0; margin-top: -2px;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: background 0.15s;
+}
+.sheet-close:hover { background: rgba(255,255,255,0.05); }
+.list-item {
+  display: flex; align-items: center; gap: var(--space-md); padding: 10px 0; border-top: 1px solid var(--line);
+}
+.list-item:first-of-type { border-top: none; }
+.list-color { width: 4px; height: 40px; border-radius: 2px; flex-shrink: 0; }
+.list-info { flex: 1; min-width: 0; }
+.list-artist { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-meta { font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.list-tier { font-size: 14px; flex-shrink: 0; }
+.list-bell {
+  font-size: 14px; flex-shrink: 0; cursor: pointer; opacity: 0.35;
+  background: transparent; border: none; padding: 4px; transition: opacity 0.15s;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.list-bell:hover { background: rgba(255,255,255,0.05); }
+.list-bell.active { opacity: 1; }
+.list-empty { text-align: center; padding: 40px 0; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.6; }
+.travel-item {
+  display: flex; align-items: flex-start; gap: var(--space-md); padding: 12px 0; border-top: 1px solid var(--line);
+}
+.travel-item:first-of-type { border-top: none; }
+.travel-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.travel-info { flex: 1; min-width: 0; }
+.travel-artist { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.travel-meta { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.travel-walk {
+  display: flex; align-items: center; gap: 6px; padding: 6px 14px; margin: 6px 0 6px 26px;
+  background: var(--bg-3); border-radius: 999px; width: fit-content;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text-dim);
+}
+.travel-walk.tight { color: var(--casa); }
+.travel-walk.conflict { color: var(--wasteland); }
+.travel-empty { text-align: center; padding: 40px 0; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.6; }
+.hour-header {
+  font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 16px; color: #fff;
+  padding: 16px 0 8px; border-top: 1px solid var(--line); margin-top: 4px; letter-spacing: 0.02em;
+}
+.hour-header:first-child { border-top: none; padding-top: 0; }
+.compare-modal {
+  background: var(--bg-3); border: 1px solid var(--line-medium); border-radius: var(--radius-lg);
+  padding: var(--space-xl); width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.compare-modal h2 { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 18px; color: #fff; margin-bottom: var(--space-sm); }
+.compare-modal p { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-muted); margin-bottom: var(--space-lg); line-height: 1.5; }
+.compare-modal textarea {
+  width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--line);
+  border-radius: var(--radius-md); color: var(--text); font-family: 'DM Mono', monospace;
+  font-size: 11px; resize: none; height: 80px; outline: none; letter-spacing: 0.02em;
+}
+.compare-modal textarea:focus { border-color: var(--line-strong); }
+.compare-actions { display: flex; gap: var(--space-sm); margin-top: var(--space-lg); justify-content: flex-end; flex-wrap: wrap; }
+.compare-actions button {
+  height: 36px; padding: 0 16px; border-radius: var(--radius-sm); border: 1px solid var(--line);
+  background: var(--bg-2); color: var(--text-dim); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; cursor: pointer; transition: all 0.15s;
+}
+.compare-actions button:hover { border-color: var(--line-strong); color: var(--text); }
+.compare-actions button.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+.compare-actions button.danger { color: var(--wasteland); border-color: color-mix(in srgb, var(--wasteland) 40%, transparent); }
+.compare-actions button.danger:hover { background: color-mix(in srgb, var(--wasteland) 8%, transparent); }
+.set.friend-pick { outline: 2px solid rgba(0,229,255,0.45); outline-offset: -2px; }
+.set.friend-match { outline: 2px solid rgba(0,229,255,0.9); outline-offset: -2px; }
+.set.friend-pick::after, .set.friend-match::after { content: none !important; }
+.set.friend-pick .friend-dot, .set.friend-match .friend-dot {
+  position: absolute; bottom: 5px; right: 7px; font-size: 9px; z-index: 3; line-height: 1;
+}
+.wallpaper-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: none;
+  align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(8px);
+}
+.wallpaper-overlay.show { display: flex; }
+.wallpaper-preview-modal {
+  background: var(--bg-2); border: 1px solid var(--line-medium); border-radius: var(--radius-lg);
+  width: 100%; max-width: 380px; overflow: hidden; display: flex; flex-direction: column;
+  max-height: 90vh; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.wallpaper-preview-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--line); flex-shrink: 0;
+}
+.wallpaper-title { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.wallpaper-close {
+  background: transparent; border: none; color: var(--text-muted); font-size: 16px;
+  cursor: pointer; padding: 4px; width: 28px; height: 28px; display: flex;
+  align-items: center; justify-content: center; border-radius: 50%; transition: background 0.15s;
+}
+.wallpaper-close:hover { background: rgba(255,255,255,0.05); }
+.wallpaper-preview-img-wrap {
+  flex: 1; overflow-y: auto; padding: var(--space-md); display: flex;
+  align-items: center; justify-content: center; background: #000;
+}
+.wallpaper-preview-img-wrap img { width: 100%; height: auto; border-radius: var(--radius-sm); display: block; }
+.wallpaper-preview-actions { display: flex; gap: var(--space-sm); padding: var(--space-md) var(--space-lg); border-top: 1px solid var(--line); flex-shrink: 0; }
+.wallpaper-cancel {
+  flex: 1; height: 40px; background: transparent; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); color: var(--text-muted); font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.15s;
+}
+.wallpaper-cancel:hover { border-color: var(--line-strong); color: var(--text-dim); }
+.wallpaper-save {
+  flex: 2; height: 40px; background: var(--kinetic); border: none; border-radius: var(--radius-sm);
+  color: #000; font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: opacity 0.15s;
+}
+.wallpaper-save:hover { opacity: 0.9; }
+.install-banner {
+  display: none; align-items: center; justify-content: space-between; gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg); background: color-mix(in srgb, var(--kinetic) 10%, var(--bg-2));
+  border-bottom: 1px solid color-mix(in srgb, var(--kinetic) 20%, transparent); flex-shrink: 0;
+}
+.install-banner.show { display: flex; }
+.install-banner span { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-dim); }
+.install-banner span strong { color: #fff; }
+.install-btn {
+  padding: 7px 14px; background: var(--kinetic); border: none; border-radius: var(--radius-sm);
+  color: #000; font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0; transition: opacity 0.15s;
+}
+.install-btn:hover { opacity: 0.9; }
+.install-dismiss {
+  background: transparent; border: none; color: var(--text-muted); font-size: 16px;
+  cursor: pointer; padding: 4px; flex-shrink: 0; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  transition: background 0.15s;
+}
+.install-dismiss:hover { background: rgba(255,255,255,0.05); }
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg-3); border: 1px solid var(--line-medium); border-radius: 999px;
+  padding: 10px 22px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
+  z-index: 2000; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.export-menu-divider { height: 1px; background: var(--line); margin: 4px 0; }
+.wallpaper-style-label {
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 700;
+  color: #444458; letter-spacing: 0.08em; padding: 4px 0 2px;
+}
+.wallpaper-style-picker {
+  display: flex; gap: 4px; flex-wrap: wrap; padding: 2px 0 6px;
+}
+.ws-btn {
+  flex: 1; min-width: 70px; height: 28px;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 6px; cursor: pointer; font-family: 'DM Mono', monospace;
+  font-size: 8.5px; font-weight: 700; letter-spacing: 0.05em;
+  color: #555570; transition: all 0.15s; white-space: nowrap;
+}
+.ws-btn:hover { border-color: var(--line-strong); color: #888; }
+.ws-btn.active { background: rgba(255,20,147,0.1); border-color: rgba(255,20,147,0.4); color: #ff1493; }
+
+@media (max-width: 640px) {
+  :root { --col-width: 140px; }
+  .header-title { font-size: 15px; }
+  .day-tab { height: 36px; }
+  .day-tab-label { font-size: 11px; }
+  .controls-row { padding: var(--space-xs) var(--space-sm); }
+  .tools-group { gap: var(--space-xs); }
+}
+@media (max-width: 420px) {
+  :root { --col-width: 124px; --time-col-width: 56px; }
+  .header-main { padding: var(--space-xs) var(--space-sm); }
+  .day-tabs { padding: 0 var(--space-sm) var(--space-xs); }
+  .controls-row { padding: var(--space-xs) var(--space-sm); gap: var(--space-xs); }
+  .stat-pill { padding: 3px 6px; font-size: 9px; }
+  .stat-pill .stat-num { font-size: 11px; }
+  .tool-btn { height: 28px; padding: 0 8px; font-size: 8px; }
+  .search-wrap input { width: 80px; height: 28px; }
+  .font-btns { height: 28px; }
+  .set { left: 3px; right: 3px; padding: 6px 6px 5px; }
+  .set .artist { font-size: 10.5px; }
+}
+body.font-large { --col-width: 188px; --time-col-width: 72px; }
+body.font-large .set .artist { font-size: 13px; }
+body.font-large .set .time { font-size: 11px; }
+body.font-large .stage-header .name { font-size: 12px; }
+body.font-xlarge { --col-width: 208px; --time-col-width: 76px; }
+body.font-xlarge .set .artist { font-size: 15px; }
+body.font-xlarge .set .time { font-size: 12px; }
+body.font-xlarge .stage-header .name { font-size: 13px; }
+body.font-large .set { padding: 9px 9px 7px; }
+body.font-xlarge .set { padding: 11px 9px 9px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+<div class="install-banner" id="installBanner">
+  <span><strong>Add to Home Screen</strong> for offline access at the venue</span>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="install-btn" id="installBtn">Install</button>
+    <button class="install-dismiss" id="installDismiss">✕</button>
+  </div>
+</div>
+
+<!-- GRID fills everything above sheet -->
+<div class="grid-container" id="gridWrap">
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- BOTTOM SHEET -->
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="sheet-handle-area" id="sheetHandleArea">
+    <div class="sheet-handle"></div>
+  </div>
+
+  <!-- Peek state: day tabs + counters + quick actions + instructions -->
+  <div class="sheet-peek">
+    <!-- Row 1: day tabs + counters -->
+    <div class="sheet-row1">
+      <div class="sheet-day-tabs">
+        <div class="day-tab active" data-day="1">
+          <span class="day-tab-label">DAY 1</span>
+          <span class="day-tab-date">MAY 15</span>
+        </div>
+        <div class="day-tab" data-day="2">
+          <span class="day-tab-label">DAY 2</span>
+          <span class="day-tab-date">MAY 16</span>
+        </div>
+        <div class="day-tab" data-day="3">
+          <span class="day-tab-label">DAY 3</span>
+          <span class="day-tab-date">MAY 17</span>
+        </div>
+      </div>
+      <div class="sheet-counters">
+        <span class="hc-pill must"><span class="hc-icon">♥</span><span class="hc-num" id="countMust">0</span></span>
+        <span class="hc-pill want"><span class="hc-icon">★</span><span class="hc-num" id="countWant">0</span></span>
+        <span class="hc-pill part"><span class="hc-icon">◑</span><span class="hc-num" id="countPart">0</span></span>
+      </div>
+    </div>
+    <!-- Row 2: quick action pills -->
+    <div class="sheet-row2">
+      <button class="qa-btn pink" id="viewToggle">♥ PICKS</button>
+      <button class="qa-btn cyan" id="listBtn">☰ LIST</button>
+      <button class="qa-btn green" id="hourlyBtn">⏱ HOURLY</button>
+      <button class="qa-btn orange" id="routeBtn">↗ ROUTE</button>
+    </div>
+    <!-- Row 3: secondary tools -->
+    <div class="sheet-row2">
+      <button class="qa-btn" id="compareBtn">👥 FRIENDS</button>
+      <button class="qa-btn" id="searchToggleBtn">🔍 SEARCH</button>
+      <button class="qa-btn" id="exportBtn">↑ EXPORT</button>
+      <button class="qa-btn" onclick="exportWallpaper(_wallpaperStyle)">📱 WALLPAPER</button>
+      <button class="qa-btn" id="resetBtn" style="color:rgba(255,60,80,0.7);border-color:rgba(255,60,80,0.2);">✕ CLEAR</button>
+    </div>
+    <!-- Export menu (hidden until tapped) -->
+    <div class="sheet-search" id="exportMenuSheet" style="display:none;padding:0 12px 8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+        <button class="fab-tool" onclick="exportPNG(true)">⬇ FULL GRID</button>
+        <button class="fab-tool" onclick="exportPNG(false)">⬇ MY PICKS</button>
+        <button class="fab-tool" onclick="exportICS()">📅 CALENDAR</button>
+        <button class="fab-tool" onclick="copyShareURL()">🔗 SHARE LINK</button>
+      </div>
+      <div style="margin-top:6px;">
+        <div class="wallpaper-style-picker" id="wallpaperStylePicker">
+          <button class="ws-btn active" onclick="selectWallpaperStyle(0,this)">ITINERARY</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(1,this)">POSTER</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(2,this)">CLOCK</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(3,this)">MINIMAL</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(4,this)">NEON</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(5,this)">STUBS</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(6,this)">HEAT MAP</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(7,this)">HOURLY</button>
+          <button class="ws-btn" onclick="selectWallpaperStyle(8,this)">FILM STRIP</button>
+        </div>
+        <button onclick="exportWallpaper(_wallpaperStyle)" class="fab-tool"
+          style="width:100%;justify-content:center;background:rgba(255,20,147,0.1);border-color:rgba(255,20,147,0.3);color:#ff1493;height:40px;margin-top:6px;">↓ EXPORT WALLPAPER</button>
+      </div>
+    </div>
+    <!-- Font size row -->
+    <div class="sheet-font-row">
+      <span class="hi-w">FONT</span>
+      <div class="font-btns">
+        <button class="font-btn active" id="fontNorm">A</button>
+        <button class="font-btn" id="fontLg">A+</button>
+        <button class="font-btn" id="fontXl">A++</button>
+      </div>
+    </div>
+    <!-- Search bar (hidden until tapped) -->
+    <div class="sheet-search" id="sheetSearch" style="display:none;padding:0 12px 8px;">
+      <input type="text" id="searchInput" placeholder="SEARCH ARTIST" autocomplete="off"
+        style="width:100%;height:40px;background:#161624;border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#f0f0f5;font-family:'DM Mono',monospace;font-size:14px;padding:0 14px;outline:none;box-sizing:border-box;-webkit-appearance:none;">
+    </div>
+    <!-- Row 3: instructions -->
+    <div class="sheet-row3">
+      <span class="hi-w">TAP:</span>
+      <span class="hi-arr">→</span><span class="hi-want">★&#8202;WANT</span>
+      <span class="hi-arr">→</span><span class="hi-must">♥&#8202;MUST</span>
+      <span class="hi-arr">→</span><span class="hi-part">◑&#8202;PART</span>
+      <span class="hi-dot">·</span>
+      <span class="hi-w">HOLD: +NOTE</span>
+    </div>
+  </div>
+
+  <!-- Expanded state: full tools (shown when sheet pulled up) -->
+  <div class="sheet-expanded" id="sheetExpanded">
+    <div class="fab-section">
+      <div class="fab-section-label">SEARCH</div>
+      <input type="text" id="searchInput" placeholder="SEARCH ARTIST" autocomplete="off"
+        style="width:100%;height:44px;background:#161624;border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#f0f0f5;font-family:'DM Mono',monospace;font-size:14px;padding:0 14px;outline:none;box-sizing:border-box;-webkit-appearance:none;">
+    </div>
+    <div class="fab-section">
+      <div class="fab-section-label">TOOLS</div>
+      <div class="fab-grid-2">
+        <button class="fab-tool" id="compareBtn">👥 FRIENDS</button>
+        <button class="fab-tool" id="resetBtn" style="color:#ff4466;">✕ CLEAR ALL</button>
+      </div>
+      <div class="fab-font-row">
+        <span class="fab-section-label" style="margin:0;">FONT SIZE</span>
+        <div class="font-btns">
+          <button class="font-btn active" id="fontNorm">A</button>
+          <button class="font-btn" id="fontLg">A+</button>
+          <button class="font-btn" id="fontXl">A++</button>
+        </div>
+      </div>
+    </div>
+    <div class="fab-section">
+      <div class="fab-section-label">EXPORT</div>
+      <div class="fab-grid-2">
+        <button class="fab-tool" onclick="exportPNG(true)">⬇ FULL GRID</button>
+        <button class="fab-tool" onclick="exportPNG(false)">⬇ MY PICKS</button>
+        <button class="fab-tool" onclick="exportICS()">📅 CALENDAR</button>
+        <button class="fab-tool" onclick="copyShareURL()">🔗 SHARE LINK</button>
+      </div>
+    </div>
+    <div class="fab-section">
+      <div class="fab-section-label">📱 SCHEDULE WALLPAPER</div>
+      <div class="wallpaper-style-picker" id="wallpaperStylePicker">
+        <button class="ws-btn active" onclick="selectWallpaperStyle(0,this)">ITINERARY</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(1,this)">POSTER</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(2,this)">CLOCK</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(3,this)">MINIMAL</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(4,this)">NEON</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(5,this)">STUBS</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(6,this)">HEAT MAP</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(7,this)">HOURLY</button>
+        <button class="ws-btn" onclick="selectWallpaperStyle(8,this)">FILM STRIP</button>
+      </div>
+      <button onclick="exportWallpaper(_wallpaperStyle)" class="fab-tool"
+        style="width:100%;justify-content:center;background:rgba(255,20,147,0.1);border-color:rgba(255,20,147,0.3);color:#ff1493;height:44px;margin-top:6px;">↓ EXPORT WALLPAPER</button>
+    </div>
+  </div>
+
+  <div class="banner conflict-banner" id="conflictBanner">
+    <span style="font-weight:900;">!</span><span id="conflictText"></span>
+  </div>
+  <div class="banner tba-banner" id="tbaBanner">
+    <span>⏰</span><span>Day 2/3 times are estimates — verify with official app</span>
+  </div>
+</div>
+
+<div class="fab-backdrop" id="fabBackdrop"></div>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add Note</h3>
+    <textarea id="modalNote" placeholder="Meet at front left, bring water, etc..."></textarea>
+    <div class="modal-buttons">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveModalNote()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="wallpaper-overlay" id="wallpaperOverlay">
+  <div class="wallpaper-preview-modal">
+    <div class="wallpaper-preview-header">
+      <span class="wallpaper-title">SCHEDULE WALLPAPER</span>
+      <button class="wallpaper-close" id="wallpaperClose">✕</button>
+    </div>
+    <div class="wallpaper-preview-img-wrap">
+      <img id="wallpaperPreviewImg" src="" alt="Schedule wallpaper preview">
+    </div>
+    <div class="wallpaper-preview-actions">
+      <button class="wallpaper-cancel" id="wallpaperCancel">CANCEL</button>
+      <button class="wallpaper-save" id="wallpaperSave">SAVE IMAGE</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel-overlay" id="travelOverlay">
+  <div class="sheet-panel">
+    <button class="sheet-close" onclick="closeTravelPanel()">✕</button>
+    <h2>Your Route</h2>
+    <div class="panel-sub" id="travelSub">Day 1 picks in time order</div>
+    <div id="travelContent"></div>
+  </div>
+</div>
+
+<div class="panel-overlay" id="listOverlay">
+  <div class="sheet-panel">
+    <button class="sheet-close" onclick="closeListPanel()">✕</button>
+    <h2>My Picks</h2>
+    <div class="panel-sub" id="listSub">Day 1 · tap 🔔 to set a reminder</div>
+    <div id="listContent"></div>
+  </div>
+</div>
+
+<div class="panel-overlay" id="hourlyOverlay">
+  <div class="sheet-panel">
+    <button class="sheet-close" onclick="closeHourlyPanel()">✕</button>
+    <h2>By Hour</h2>
+    <div class="panel-sub" id="hourlySub">Day 1 · your picks in time order</div>
+    <div id="hourlyContent"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="compareOverlay">
+  <div class="compare-modal">
+    <button class="sheet-close" onclick="document.getElementById('compareOverlay').classList.remove('show')" style="float:right;margin:-4px -4px 0 0;">✕</button>
+    <h2>👥 Compare with a Friend</h2>
+    <p>Paste a friend's share link below. Their picks will show as a cyan outline on your grid — matching picks glow brighter.</p>
+    <textarea id="compareInput" placeholder="Paste share link here..."></textarea>
+    <div class="compare-actions">
+      <button onclick="document.getElementById('compareOverlay').classList.remove('show')">Cancel</button>
+      <button class="danger" id="clearCompareBtn" style="display:none" onclick="clearFriendPicks()">Clear Friend</button>
+      <button class="primary" onclick="loadFriendPicks()">Compare</button>
+    </div>
+  </div>
+</div><!-- end compareOverlay -->
+
+<!-- Custom marker modal -->
+<div class="marker-modal-backdrop" id="markerModalBackdrop">
+  <div class="marker-modal">
+    <div class="marker-modal-header">
+      <span class="marker-modal-title">📍 ADD MARKER</span>
+      <button class="marker-modal-close" id="markerModalClose">✕</button>
+    </div>
+    <div class="marker-modal-time-row">
+      <button class="marker-time-btn" id="markerTimeMinus">−</button>
+      <div class="marker-modal-time" id="markerModalTime">1:40 AM</div>
+      <button class="marker-time-btn" id="markerTimePlus">+</button>
+    </div>
+    <input type="text" id="markerLabelInput" placeholder="E.g. MEET JOSH" maxlength="30"
+      style="width:100%;height:68px;min-height:68px;background:#161624;border:1px solid rgba(255,255,255,0.08);border-radius:14px;color:#f0f0f5;font-family:'Outfit',sans-serif;font-weight:700;font-size:22px;padding:0 18px;outline:none;box-sizing:border-box;text-transform:uppercase;-webkit-appearance:none;display:block;">
+    <div class="marker-color-row" id="markerColorRow"></div>
+    <div class="marker-modal-actions">
+      <button class="marker-btn save" id="markerSaveBtn">SAVE</button>
+      <button class="marker-btn delete" id="markerDeleteBtn" style="display:none;">DELETE</button>
+      <button class="marker-btn cancel" id="markerCancelBtn">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// STAGE CONFIG
+// ============================================
+const STAGES = [
+  { id: 'kinetic',     name: 'Kinetic Field',     color: '#ff2a6d', genre: 'mainstage' },
+  { id: 'circuit',     name: 'Circuit Grounds',   color: '#00d9ff', genre: 'bass/dubstep' },
+  { id: 'cosmic',      name: 'Cosmic Meadow',     color: '#00f5d4', genre: 'house/bass' },
+  { id: 'basspod',     name: 'Basspod',           color: '#ff6b35', genre: 'dubstep/dnb' },
+  { id: 'neon-garden', name: 'Neon Garden',       color: '#c77dff', genre: 'techno/deep' },
+  { id: 'quantum',     name: 'Quantum Valley',    color: '#b5179e', genre: 'trance' },
+  { id: 'wasteland',   name: 'Wasteland',         color: '#ff003c', genre: 'hardstyle' },
+  { id: 'stereobloom', name: 'Stereo Bloom',       color: '#ccff00', genre: 'house/tech' },
+  { id: 'bionic',      name: 'Bionic Jungle',     color: '#72efdd', genre: 'house' },
+  { id: 'casa',        name: 'Casa Bacardi',      color: '#ffd60a', genre: 'latin/house' },
+  { id: 'forest',      name: 'Forest House',      color: '#38b000', genre: 'house' },
+  { id: 'yeedc',       name: 'YeeDC',             color: '#ff9e00', genre: 'bass' },
+  { id: 'beatbox',     name: 'Beatbox Art Car',   color: '#4cc9f0', genre: 'varied' },
+  { id: 'insomniac',   name: 'Insomniac Fridays', color: '#9d4edd', genre: 'varied' },
+];
+
+const TIERS = ['off', 'want', 'must', 'part'];
+const TIER_ICONS = { off: '', want: '★', must: '♥', part: '◑' };
+
+// ============================================
+// DAY CONFIG
+// ============================================
+const DAY_CONFIG = {
+  1: { start: '5:00pm', startMin: 17*60, endMin: (5+24)*60 + 30, label: 'Fri May 15', pxPerMin: 1.6 },
+  2: { start: '7:00pm', startMin: 19*60, endMin: (5+24)*60 + 30, label: 'Sat May 16', pxPerMin: 1.6 },
+  3: { start: '7:00pm', startMin: 19*60, endMin: (5+24)*60 + 30, label: 'Sun May 17', pxPerMin: 1.6 },
+};
+
+// ============================================
+// ============================================
+// LINEUP DATA — verified against Festival Dust (May 2026)
+// ============================================
+const LINEUP = {
+  1: [
+    // Kinetic Field
+    { stage:'kinetic', artist:'LAIDBACK LUKE B2B CHUCKIE', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'kinetic', artist:'KOROLOVA', start:'8:00pm', end:'9:00pm', genre:'trance' },
+    { stage:'kinetic', artist:'ARGY', start:'9:00pm', end:'10:00pm', genre:'techno' },
+    { stage:'kinetic', artist:'CHRIS LORENZO', start:'10:07pm', end:'11:15pm', genre:'house/bass' },
+    { stage:'kinetic', artist:'SOFI TUKKER', start:'11:19pm', end:'12:30am', genre:'electro-pop' },
+    { stage:'kinetic', artist:'THE CHAINSMOKERS', start:'12:32am', end:'1:42am', genre:'mainstage' },
+    { stage:'kinetic', artist:'FISHER', start:'1:47am', end:'2:57am', genre:'tech-house' },
+    { stage:'kinetic', artist:'PORTER ROBINSON', start:'3:01am', end:'4:11am', genre:'electro' },
+    { stage:'kinetic', artist:'CHARLOTTE DE WITTE', start:'4:14am', end:'5:29am', genre:'techno' },
+    // Circuit Grounds
+    { stage:'circuit', artist:'1991', start:'7:00pm', end:'8:00pm', genre:'dnb' },
+    { stage:'circuit', artist:'BOU', start:'8:00pm', end:'9:00pm', genre:'dnb' },
+    { stage:'circuit', artist:'NICO MORENO', start:'9:00pm', end:'10:00pm', genre:'hard-techno' },
+    { stage:'circuit', artist:'I HATE MODELS', start:'10:00pm', end:'11:15pm', genre:'techno' },
+    { stage:'circuit', artist:'LEVITY', start:'11:15pm', end:'12:25am', genre:'bass' },
+    { stage:'circuit', artist:'WOOLI', start:'12:25am', end:'1:35am', genre:'dubstep' },
+    { stage:'circuit', artist:'THE OUTLAW', start:'1:35am', end:'2:35am', genre:'dubstep' },
+    { stage:'circuit', artist:'HOLY PRIEST', start:'2:35am', end:'3:30am', genre:'dubstep' },
+    { stage:'circuit', artist:'RAY VOLPE', start:'3:30am', end:'4:30am', genre:'dubstep' },
+    { stage:'circuit', artist:'LEVEL UP', start:'4:30am', end:'5:30am', genre:'dubstep' },
+    // Cosmic Meadow
+    { stage:'cosmic', artist:'MAX DEAN B2B LUKE DEAN', start:'5:00pm', end:'6:50pm', genre:'house' },
+    { stage:'cosmic', artist:'JACKIE HOLLANDER', start:'7:00pm', end:'7:55pm', genre:'house' },
+    { stage:'cosmic', artist:'RODDY LIMA', start:'7:55pm', end:'8:55pm', genre:'house' },
+    { stage:'cosmic', artist:'WESTEND', start:'8:55pm', end:'9:55pm', genre:'house' },
+    { stage:'cosmic', artist:'WALKER & ROYCE B2B VNSSA', start:'9:55pm', end:'10:55pm', genre:'house' },
+    { stage:'cosmic', artist:'UNDERWORLD', start:'11:10pm', end:'12:10am', genre:'electro' },
+    { stage:'cosmic', artist:'MEDUZA', start:'12:25am', end:'1:45am', genre:'house' },
+    { stage:'cosmic', artist:'NOTION', start:'1:47am', end:'2:47am', genre:'bass-house' },
+    { stage:'cosmic', artist:'MPH', start:'2:47am', end:'4:02am', genre:'bass-house' },
+    { stage:'cosmic', artist:'SAN PACHO', start:'4:02am', end:'5:30am', genre:'house' },
+    // Basspod
+    { stage:'basspod', artist:'RIOT', start:'7:00pm', end:'7:50pm', genre:'dubstep' },
+    { stage:'basspod', artist:'HEYZ', start:'7:50pm', end:'8:40pm', genre:'dubstep' },
+    { stage:'basspod', artist:'MUZZ', start:'8:40pm', end:'9:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'GORILLAT', start:'9:30pm', end:'10:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'GHENGAR', start:'10:30pm', end:'11:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'DEATHPACT', start:'11:30pm', end:'12:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'ATLIENS', start:'12:30am', end:'1:30am', genre:'bass' },
+    { stage:'basspod', artist:'KAI WACHI', start:'1:30am', end:'2:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'ADVENTURE CLUB', start:'2:30am', end:'3:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'CULTURE SHOCK', start:'3:30am', end:'4:30am', genre:'dnb' },
+    { stage:'basspod', artist:'CYCLOPS', start:'4:30am', end:'5:30am', genre:'dubstep' },
+    // Neon Garden
+    { stage:'neon-garden', artist:'ANASTAZJA', start:'7:00pm', end:'8:30pm', genre:'techno' },
+    { stage:'neon-garden', artist:'MESTIZA', start:'8:30pm', end:'10:00pm', genre:'techno' },
+    { stage:'neon-garden', artist:'DJ TENNIS B2B CHLOE CAILLET', start:'10:00pm', end:'11:30pm', genre:'house' },
+    { stage:'neon-garden', artist:'PEGGY GOU', start:'11:30pm', end:'1:00am', genre:'house' },
+    { stage:'neon-garden', artist:'ADRIATIQUE', start:'1:00am', end:'2:30am', genre:'deep-house' },
+    { stage:'neon-garden', artist:'JOSEPH CAPRIATI', start:'2:30am', end:'4:00am', genre:'techno' },
+    { stage:'neon-garden', artist:'ELI BROWN', start:'4:00am', end:'5:30am', genre:'techno' },
+    // Quantum Valley
+    { stage:'quantum', artist:'SARAH DE WARREN', start:'7:00pm', end:'8:00pm', genre:'trance' },
+    { stage:'quantum', artist:'MATTY RALPH', start:'8:00pm', end:'9:00pm', genre:'trance' },
+    { stage:'quantum', artist:'COLD BLUE', start:'9:00pm', end:'10:00pm', genre:'trance' },
+    { stage:'quantum', artist:'PEGASSI', start:'10:00pm', end:'11:00pm', genre:'trance' },
+    { stage:'quantum', artist:'DARUDE', start:'11:00pm', end:'12:00am', genre:'trance' },
+    { stage:'quantum', artist:'COSMIC GATE', start:'12:00am', end:'1:00am', genre:'trance' },
+    { stage:'quantum', artist:'GARETH EMERY', start:'1:00am', end:'2:00am', genre:'trance' },
+    { stage:'quantum', artist:'ILAN BLUESTONE', start:'2:00am', end:'3:00am', genre:'trance' },
+    { stage:'quantum', artist:'PAUL VAN DYK', start:'3:00am', end:'4:00am', genre:'trance' },
+    { stage:'quantum', artist:'DARREN PORTER', start:'4:00am', end:'5:30am', genre:'trance' },
+    // Wasteland
+    { stage:'wasteland', artist:'DOMINA', start:'7:00pm', end:'8:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'SERAFINA', start:'8:30pm', end:'9:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'JOHANNES SCHUSTER', start:'9:30pm', end:'10:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'ADRIAN MILLS', start:'10:30pm', end:'11:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'CLOUDY', start:'11:30pm', end:'12:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'KUKO', start:'12:30am', end:'1:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'GRAVEDGR', start:'1:30am', end:'2:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'REBEKAH', start:'2:30am', end:'3:30am', genre:'techno' },
+    { stage:'wasteland', artist:'DYEN', start:'3:30am', end:'4:30am', genre:'hard-techno' },
+    { stage:'wasteland', artist:'STAN CHRIST', start:'4:30am', end:'5:30am', genre:'hardstyle' },
+    // Stereobloom
+    { stage:'stereobloom', artist:'ABANA B2B JULIET MENDOZA', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'SLAMM', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'LUUK VAN DIJK', start:'9:00pm', end:'10:15pm', genre:'house' },
+    { stage:'stereobloom', artist:'OMAR+', start:'10:15pm', end:'11:30pm', genre:'house' },
+    { stage:'stereobloom', artist:'LUKE DEAN', start:'11:30pm', end:'12:45am', genre:'house' },
+    { stage:'stereobloom', artist:'JOSH BAKER', start:'12:45am', end:'2:00am', genre:'house' },
+    { stage:'stereobloom', artist:'MAX DEAN', start:'2:00am', end:'3:15am', genre:'house' },
+    { stage:'stereobloom', artist:'OBSKUR', start:'3:15am', end:'4:30am', genre:'house' },
+    { stage:'stereobloom', artist:'TOMAN', start:'4:30am', end:'5:30am', genre:'house' },
+    // Bionic Jungle
+    { stage:'bionic', artist:'HEIDI LAWDEN B2B MASHA MAR', start:'5:00pm', end:'7:00pm', genre:'house' },
+    { stage:'bionic', artist:'STACY CHRISTINE', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'bionic', artist:'THE CARRY NATION', start:'8:00pm', end:'9:30pm', genre:'house' },
+    { stage:'bionic', artist:'MASSIMILIANO PAGLIARA', start:'9:30pm', end:'11:00pm', genre:'house' },
+    { stage:'bionic', artist:'PARAMIDA', start:'11:00pm', end:'12:30am', genre:'house' },
+    { stage:'bionic', artist:'SALUTE B2B CHLOE CAILLET', start:'12:30am', end:'2:30am', genre:'house' },
+    { stage:'bionic', artist:'ROBERT HOOD', start:'2:30am', end:'4:00am', genre:'techno' },
+    { stage:'bionic', artist:'AVALON EMERSON', start:'4:00am', end:'5:30am', genre:'house' },
+    // Casa Bacardi
+    { stage:'casa', artist:'JRUIZ', start:'7:00pm', end:'8:00pm', genre:'latin' },
+    { stage:'casa', artist:'CARDO', start:'8:00pm', end:'9:00pm', genre:'latin' },
+    { stage:'casa', artist:'J PATRON', start:'9:00pm', end:'10:00pm', genre:'latin' },
+    { stage:'casa', artist:'CC LOVE', start:'10:00pm', end:'11:30pm', genre:'latin' },
+    { stage:'casa', artist:'JFUSE', start:'11:30pm', end:'1:00am', genre:'latin' },
+    { stage:'casa', artist:'DRAMOS', start:'1:00am', end:'2:30am', genre:'latin' },
+    { stage:'casa', artist:'GUARI', start:'2:30am', end:'4:00am', genre:'latin' },
+    { stage:'casa', artist:'DJ EXILE', start:'4:00am', end:'5:30am', genre:'latin' },
+    // Forest House
+    { stage:'forest', artist:'BIG DADDY KESS', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'forest', artist:'SUSSY', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'forest', artist:'DONO', start:'9:00pm', end:'10:00pm', genre:'house' },
+    { stage:'forest', artist:'MAX LOW', start:'10:00pm', end:'11:00pm', genre:'house' },
+    { stage:'forest', artist:'JOEY G', start:'11:00pm', end:'12:00am', genre:'house' },
+    { stage:'forest', artist:'CASTOR & POLLUX', start:'1:00am', end:'2:00am', genre:'house' },
+    { stage:'forest', artist:'ZAANEE', start:'2:00am', end:'3:00am', genre:'house' },
+    { stage:'forest', artist:'TC', start:'3:00am', end:'4:00am', genre:'house' },
+    { stage:'forest', artist:'PLS&TY', start:'4:00am', end:'5:30am', genre:'house' },
+    // YeeDC
+    { stage:'yeedc', artist:'SOSO DRU', start:'7:00pm', end:'8:45pm', genre:'bass' },
+    { stage:'yeedc', artist:'$AMI G', start:'8:45pm', end:'10:15pm', genre:'bass' },
+    { stage:'yeedc', artist:'DIRTY AUDIO', start:'10:15pm', end:'12:00am', genre:'bass' },
+    { stage:'yeedc', artist:'GRANT FISHER', start:'12:00am', end:'1:30am', genre:'bass' },
+    { stage:'yeedc', artist:'ROADHOUSE', start:'1:30am', end:'3:15am', genre:'bass' },
+    // Beatbox Art Car
+    { stage:'beatbox', artist:'NOT NOT', start:'7:00pm', end:'8:15pm', genre:'varied' },
+    { stage:'beatbox', artist:'MER BEAR', start:'8:15pm', end:'9:30pm', genre:'varied' },
+    { stage:'beatbox', artist:'LADY SINCLAIR', start:'9:30pm', end:'10:45pm', genre:'varied' },
+    { stage:'beatbox', artist:'TSU NAMI', start:'10:45pm', end:'12:00am', genre:'varied' },
+    { stage:'beatbox', artist:'ARMNHMR', start:'12:00am', end:'1:30am', genre:'melodic-bass' },
+    { stage:'beatbox', artist:'ERO808', start:'1:30am', end:'3:00am', genre:'varied' },
+    { stage:'beatbox', artist:'KELLAND', start:'3:00am', end:'4:15am', genre:'varied' },
+    { stage:'beatbox', artist:'TAVATLI', start:'4:15am', end:'5:30am', genre:'varied' },
+    // Insomniac Fridays
+    { stage:'insomniac', artist:'THE KANDYMAN', start:'7:00pm', end:'8:30pm', genre:'varied' },
+    { stage:'insomniac', artist:'DEMIGOD', start:'8:30pm', end:'9:45pm', genre:'varied' },
+    { stage:'insomniac', artist:'LOUIS LOVE', start:'9:45pm', end:'11:00pm', genre:'varied' },
+    { stage:'insomniac', artist:'R.A.W.', start:'11:00pm', end:'12:15am', genre:'varied' },
+    { stage:'insomniac', artist:'RON D CORE', start:'12:15am', end:'1:30am', genre:'varied' },
+    { stage:'insomniac', artist:'MOONPUP', start:'1:30am', end:'2:45am', genre:'varied' },
+    { stage:'insomniac', artist:'STEVE LECLAIR', start:'2:45am', end:'4:00am', genre:'varied' },
+    { stage:'insomniac', artist:'JASON SPLAT', start:'4:00am', end:'5:30am', genre:'varied' },
+  ],
+  2: [
+    // Kinetic Field
+    { stage:'kinetic', artist:'AR/CO', start:'7:00pm', end:'8:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'HAYLA', start:'8:00pm', end:'9:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'SUB FOCUS', start:'9:00pm', end:'10:00pm', genre:'dnb' },
+    { stage:'kinetic', artist:'STEVE AOKI', start:'10:07pm', end:'11:15pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'HARDWELL', start:'11:19pm', end:'12:29am', genre:'mainstage' },
+    { stage:'kinetic', artist:'JOHN SUMMIT', start:'12:32am', end:'1:42am', genre:'house' },
+    { stage:'kinetic', artist:'SUBTRONICS', start:'1:47am', end:'2:57am', genre:'dubstep' },
+    { stage:'kinetic', artist:'KASKADE', start:'3:01am', end:'4:11am', genre:'house' },
+    { stage:'kinetic', artist:'ABOVE & BEYOND', start:'4:14am', end:'5:29am', genre:'trance' },
+    // Circuit Grounds
+    { stage:'circuit', artist:'DJ MANDY', start:'7:00pm', end:'8:00pm', genre:'techno' },
+    { stage:'circuit', artist:'ROZ', start:'8:00pm', end:'9:15pm', genre:'techno' },
+    { stage:'circuit', artist:'KETTAMA', start:'9:15pm', end:'10:45pm', genre:'house' },
+    { stage:'circuit', artist:'SAMMY VIRJI', start:'10:45pm', end:'12:15am', genre:'bass' },
+    { stage:'circuit', artist:'TIËSTO', start:'12:15am', end:'1:45am', genre:'mainstage' },
+    { stage:'circuit', artist:'PEGGY GOU B2B KI/KI', start:'1:45am', end:'3:15am', genre:'house' },
+    { stage:'circuit', artist:'BOYS NOIZE', start:'3:15am', end:'4:30am', genre:'electro' },
+    { stage:'circuit', artist:'LILLY PALMER', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Cosmic Meadow
+    { stage:'cosmic', artist:'FROST CHILDREN', start:'7:00pm', end:'8:15pm', genre:'hyperpop' },
+    { stage:'cosmic', artist:'HANNAH LAING', start:'8:15pm', end:'9:25pm', genre:'hard-house' },
+    { stage:'cosmic', artist:'SNOW STRIPPERS', start:'9:25pm', end:'10:15pm', genre:'electro' },
+    { stage:'cosmic', artist:'VTSS', start:'10:15pm', end:'11:30pm', genre:'hard-techno' },
+    { stage:'cosmic', artist:'THE PRODIGY', start:'11:35pm', end:'12:35am', genre:'electro' },
+    { stage:'cosmic', artist:'BUNT.', start:'12:40am', end:'2:10am', genre:'folk-house' },
+    { stage:'cosmic', artist:'INTER PLANETARY CRIMINAL', start:'2:10am', end:'3:30am', genre:'ukg' },
+    { stage:'cosmic', artist:'MALUGI', start:'3:30am', end:'4:30am', genre:'house' },
+    { stage:'cosmic', artist:'DJ GIGOLA B2B MCR-T', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Basspod
+    { stage:'basspod', artist:'FALLEN WITH MC DINO', start:'7:00pm', end:'7:50pm', genre:'dnb' },
+    { stage:'basspod', artist:'AVELLO B2B DENNETT', start:'7:50pm', end:'8:40pm', genre:'dubstep' },
+    { stage:'basspod', artist:'VIPERACTIVE', start:'8:40pm', end:'9:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'HYBRID MINDS', start:'9:30pm', end:'10:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'YDG', start:'10:30pm', end:'11:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'DELTA HEAVY', start:'11:30pm', end:'12:30am', genre:'dnb' },
+    { stage:'basspod', artist:'GETTER', start:'12:30am', end:'1:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'EPTIC B2B SPACE LACES', start:'1:30am', end:'2:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'DOCTOR P B2B FLUX PAVILION B2B FUNTCASE', start:'2:30am', end:'3:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'HOL!', start:'3:30am', end:'4:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'MARY DROPPINZ', start:'4:30am', end:'5:30am', genre:'dubstep' },
+    // Neon Garden
+    { stage:'neon-garden', artist:'MINK', start:'7:00pm', end:'8:30pm', genre:'techno' },
+    { stage:'neon-garden', artist:'SILVIE LOTO', start:'8:30pm', end:'10:00pm', genre:'house' },
+    { stage:'neon-garden', artist:'AHMED SPINS', start:'10:00pm', end:'11:30pm', genre:'house' },
+    { stage:'neon-garden', artist:'LUCIANO', start:'11:30pm', end:'1:30am', genre:'house' },
+    { stage:'neon-garden', artist:'PROSPA', start:'1:30am', end:'3:30am', genre:'house' },
+    { stage:'neon-garden', artist:'JOSH BAKER B2B KETTAMA B2B PROSPA', start:'3:30am', end:'5:30am', genre:'house' },
+    // Quantum Valley
+    { stage:'quantum', artist:'MARIA HEALY', start:'7:00pm', end:'8:30pm', genre:'trance' },
+    { stage:'quantum', artist:'SUPERSTRINGS', start:'8:30pm', end:'9:30pm', genre:'trance' },
+    { stage:'quantum', artist:'BILLY GILLIES', start:'9:30pm', end:'10:30pm', genre:'trance' },
+    { stage:'quantum', artist:'PAUL OAKENFOLD', start:'10:30pm', end:'11:30pm', genre:'trance' },
+    { stage:'quantum', artist:'ANDREW RAYEL', start:'11:30pm', end:'12:30am', genre:'trance' },
+    { stage:'quantum', artist:'MADDIX', start:'12:30am', end:'1:30am', genre:'trance' },
+    { stage:'quantum', artist:'MATHAME', start:'1:30am', end:'2:30am', genre:'trance' },
+    { stage:'quantum', artist:'ASTRIX', start:'2:30am', end:'3:30am', genre:'psytrance' },
+    { stage:'quantum', artist:'T78', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'quantum', artist:'THOMAS SCHUMACHER', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Wasteland
+    { stage:'wasteland', artist:'CUTDWN', start:'7:00pm', end:'8:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'DEAD X', start:'8:30pm', end:'9:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'THE SAINTS', start:'9:30pm', end:'10:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'ROB GEE B2B LENNY DEE', start:'10:30pm', end:'11:30pm', genre:'hardcore' },
+    { stage:'wasteland', artist:'LADY FAITH B2B LNY TNZ', start:'11:30pm', end:'12:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'CODE BLACK B2B AUDIOFREQ B2B TONESHIFTERZ', start:'12:30am', end:'1:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'DA TWEEKAZ', start:'1:30am', end:'2:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'LIL TEXAS', start:'2:30am', end:'3:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'MISH', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'wasteland', artist:'ALYSSA JOLEE', start:'4:30am', end:'5:30am', genre:'hardstyle' },
+    // Stereobloom
+    { stage:'stereobloom', artist:'SLUGG', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'DISCIP', start:'9:00pm', end:'10:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'OMNOM', start:'10:00pm', end:'11:15pm', genre:'house' },
+    { stage:'stereobloom', artist:'NOIZU', start:'11:15pm', end:'12:30am', genre:'house' },
+    { stage:'stereobloom', artist:'WAX MOTIF', start:'12:30am', end:'1:45am', genre:'house' },
+    { stage:'stereobloom', artist:'CID', start:'1:45am', end:'3:00am', genre:'house' },
+    { stage:'stereobloom', artist:'HNTR', start:'3:00am', end:'4:15am', genre:'house' },
+    { stage:'stereobloom', artist:'BOLO', start:'4:15am', end:'5:30am', genre:'house' },
+    // Bionic Jungle
+    { stage:'bionic', artist:'SPRAY', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'bionic', artist:'BASHKKA B2B SEDEF ADASI', start:'9:00pm', end:'10:30pm', genre:'house' },
+    { stage:'bionic', artist:'HAAI B2B LUKE ALESSI', start:'10:30pm', end:'12:00am', genre:'house' },
+    { stage:'bionic', artist:'MCR-T', start:'12:00am', end:'1:15am', genre:'techno' },
+    { stage:'bionic', artist:'BAD BOOMBOX B2B OLLIE LISHMAN', start:'1:15am', end:'2:30am', genre:'house' },
+    { stage:'bionic', artist:'BENWAL', start:'2:30am', end:'3:30am', genre:'house' },
+    { stage:'bionic', artist:'BAUGRUPPE90', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'bionic', artist:'CLUB ANGEL', start:'4:30am', end:'5:30am', genre:'house' },
+    // Casa Bacardi
+    { stage:'casa', artist:'LUCKY LOU', start:'7:00pm', end:'8:30pm', genre:'latin' },
+    { stage:'casa', artist:'LUKE ALEXANDER', start:'8:30pm', end:'10:00pm', genre:'latin' },
+    { stage:'casa', artist:'DREYA V', start:'11:30pm', end:'1:00am', genre:'latin' },
+    { stage:'casa', artist:'ELI FOLA', start:'2:30am', end:'4:00am', genre:'latin' },
+    { stage:'casa', artist:'SKILAH', start:'4:00am', end:'5:30am', genre:'latin' },
+    // Forest House
+    { stage:'forest', artist:'AJ BALL', start:'7:00pm', end:'7:45pm', genre:'house' },
+    { stage:'forest', artist:'LINNEY', start:'7:45pm', end:'8:45pm', genre:'house' },
+    { stage:'forest', artist:'JUSTUS', start:'8:45pm', end:'9:45pm', genre:'house' },
+    { stage:'forest', artist:'DISCOVERY PROJECT', start:'9:45pm', end:'10:45pm', genre:'house' },
+    { stage:'forest', artist:'MATT FAULK', start:'10:45pm', end:'12:00am', genre:'house' },
+    { stage:'forest', artist:'POLAR BEARS', start:'12:00am', end:'1:00am', genre:'house' },
+    { stage:'forest', artist:'DAMON SHARPE', start:'3:00am', end:'4:00am', genre:'house' },
+    { stage:'forest', artist:'MICAH MARTIN', start:'4:00am', end:'5:30am', genre:'house' },
+    // YeeDC
+    { stage:'yeedc', artist:'CARNEYVAL', start:'7:00pm', end:'8:45pm', genre:'bass' },
+    { stage:'yeedc', artist:'ROXY FERRARI', start:'8:45pm', end:'10:15pm', genre:'bass' },
+    { stage:'yeedc', artist:'DAZY DUKE', start:'10:15pm', end:'12:00am', genre:'bass' },
+    { stage:'yeedc', artist:'MADDS', start:'12:00am', end:'1:30am', genre:'bass' },
+    { stage:'yeedc', artist:'SLIM MCGRAW', start:'1:30am', end:'3:15am', genre:'bass' },
+    { stage:'yeedc', artist:'TAYLOR KADE', start:'3:15am', end:'4:15am', genre:'bass' },
+    // Beatbox Art Car
+    { stage:'beatbox', artist:'GUSTA', start:'7:00pm', end:'8:15pm', genre:'varied' },
+    { stage:'beatbox', artist:'RAJE', start:'8:15pm', end:'9:30pm', genre:'varied' },
+    { stage:'beatbox', artist:'BENNI OLA', start:'9:30pm', end:'10:45pm', genre:'varied' },
+    { stage:'beatbox', artist:'PLAYER DAVE', start:'10:45pm', end:'12:00am', genre:'varied' },
+    { stage:'beatbox', artist:'CANARY YELLOW', start:'12:00am', end:'1:30am', genre:'varied' },
+    { stage:'beatbox', artist:'SAMSON', start:'1:30am', end:'3:00am', genre:'varied' },
+    { stage:'beatbox', artist:'MATTILO', start:'3:00am', end:'4:15am', genre:'varied' },
+    { stage:'beatbox', artist:'OKAYVAL', start:'4:15am', end:'5:30am', genre:'varied' },
+    // Insomniac Fridays (stage runs all 3 days)
+    { stage:'insomniac', artist:'DJ FLITE', start:'7:00pm', end:'8:30pm', genre:'varied' },
+    { stage:'insomniac', artist:'TONY CAMBOA', start:'8:30pm', end:'9:45pm', genre:'varied' },
+    { stage:'insomniac', artist:'REID SPEED', start:'9:45pm', end:'11:00pm', genre:'varied' },
+    { stage:'insomniac', artist:'FESTER, OSCURE & THEE-O', start:'11:00pm', end:'1:30am', genre:'varied' },
+    { stage:'insomniac', artist:'MELLINFUNK', start:'1:30am', end:'2:45am', genre:'varied' },
+    { stage:'insomniac', artist:'JON BISHOP', start:'2:45am', end:'4:00am', genre:'varied' },
+    { stage:'insomniac', artist:'ERIC DAVENPORT', start:'4:00am', end:'5:30am', genre:'varied' },
+  ],
+  3: [
+    // Kinetic Field
+    { stage:'kinetic', artist:'TRACE', start:'7:00pm', end:'8:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'SHIP WREK', start:'8:00pm', end:'9:00pm', genre:'mainstage' },
+    { stage:'kinetic', artist:'LAYTON GIORDANI', start:'9:00pm', end:'10:00pm', genre:'techno' },
+    { stage:'kinetic', artist:'FUNK TRIBU', start:'10:07pm', end:'11:15pm', genre:'house' },
+    { stage:'kinetic', artist:'GRIZ B2B WOOLI', start:'11:19pm', end:'12:29am', genre:'bass' },
+    { stage:'kinetic', artist:'ZEDD', start:'12:32am', end:'1:42am', genre:'mainstage' },
+    { stage:'kinetic', artist:'MARTIN GARRIX', start:'1:47am', end:'2:57am', genre:'mainstage' },
+    { stage:'kinetic', artist:'CLOONEE', start:'3:01am', end:'4:11am', genre:'tech-house' },
+    { stage:'kinetic', artist:'ARMIN VAN BUUREN', start:'4:14am', end:'5:29am', genre:'trance' },
+    // Circuit Grounds
+    { stage:'circuit', artist:'LINSKA', start:'7:00pm', end:'8:30pm', genre:'techno' },
+    { stage:'circuit', artist:'ANNA', start:'8:30pm', end:'10:00pm', genre:'techno' },
+    { stage:'circuit', artist:'BELTRAN', start:'10:00pm', end:'11:30pm', genre:'house' },
+    { stage:'circuit', artist:'CHRIS STUSSY', start:'11:30pm', end:'1:00am', genre:'house' },
+    { stage:'circuit', artist:'SOLOMUN', start:'1:00am', end:'2:30am', genre:'house' },
+    { stage:'circuit', artist:'VINTAGE CULTURE', start:'2:30am', end:'4:00am', genre:'house' },
+    { stage:'circuit', artist:'KEVIN DE VRIES', start:'4:00am', end:'5:30am', genre:'techno' },
+    // Cosmic Meadow
+    { stage:'cosmic', artist:'GRAVAGERZ', start:'7:00pm', end:'8:00pm', genre:'bass' },
+    { stage:'cosmic', artist:'NOSTALGIX', start:'8:00pm', end:'9:00pm', genre:'bass' },
+    { stage:'cosmic', artist:'WILLIAM BLACK', start:'9:00pm', end:'10:00pm', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'SAN HOLO', start:'10:00pm', end:'11:00pm', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'DABIN', start:'11:00pm', end:'12:05am', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'ALISON WONDERLAND', start:'12:05am', end:'1:05am', genre:'bass' },
+    { stage:'cosmic', artist:'SEVEN LIONS', start:'1:05am', end:'2:20am', genre:'melodic-bass' },
+    { stage:'cosmic', artist:'RESTRICTED', start:'2:20am', end:'3:20am', genre:'techno' },
+    { stage:'cosmic', artist:'BLACK TIGER SEX MACHINE', start:'3:20am', end:'4:30am', genre:'bass' },
+    { stage:'cosmic', artist:'NICO MORENO B2B HOLY PRIEST', start:'4:30am', end:'5:30am', genre:'techno' },
+    // Basspod
+    { stage:'basspod', artist:'NIGHTSTALKER', start:'7:00pm', end:'7:50pm', genre:'dnb' },
+    { stage:'basspod', artist:'SIPPY', start:'7:50pm', end:'8:40pm', genre:'dubstep' },
+    { stage:'basspod', artist:'EAZYBAKED', start:'8:40pm', end:'9:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'INFEKT B2B SAMPLIFIRE', start:'9:30pm', end:'10:30pm', genre:'dubstep' },
+    { stage:'basspod', artist:'A.M.C', start:'10:30pm', end:'11:30pm', genre:'dnb' },
+    { stage:'basspod', artist:'VIRTUAL RIOT', start:'11:30pm', end:'12:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'PEEKABOO', start:'12:30am', end:'1:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'AHEE B2B LIQUID STRANGER', start:'1:30am', end:'2:30am', genre:'bass' },
+    { stage:'basspod', artist:'WHETHAN', start:'2:30am', end:'3:30am', genre:'bass' },
+    { stage:'basspod', artist:'BOOGIE T B2B DISTINCT MOTIVE', start:'3:30am', end:'4:30am', genre:'dubstep' },
+    { stage:'basspod', artist:'AEON:MODE', start:'4:30am', end:'5:30am', genre:'bass' },
+    // Neon Garden
+    { stage:'neon-garden', artist:'BAD BEAT', start:'7:00pm', end:'8:15pm', genre:'techno' },
+    { stage:'neon-garden', artist:'ADIEL', start:'9:30pm', end:'10:50pm', genre:'techno' },
+    { stage:'neon-garden', artist:'DJ GIGOLA', start:'10:50pm', end:'12:10am', genre:'techno' },
+    { stage:'neon-garden', artist:'999999999', start:'12:10am', end:'1:30am', genre:'techno' },
+    { stage:'neon-garden', artist:'INDIRA PAGANOTTO', start:'1:30am', end:'2:50am', genre:'techno' },
+    { stage:'neon-garden', artist:'KI/KI', start:'2:50am', end:'4:10am', genre:'techno' },
+    { stage:'neon-garden', artist:'KLANGKUENSTLER', start:'4:10am', end:'5:30am', genre:'techno' },
+    // Quantum Valley
+    { stage:'quantum', artist:'WARUNG', start:'7:00pm', end:'8:00pm', genre:'trance' },
+    { stage:'quantum', artist:'SHINGO NAKAMURA', start:'8:00pm', end:'9:00pm', genre:'trance' },
+    { stage:'quantum', artist:'REBUKE', start:'9:00pm', end:'10:00pm', genre:'trance' },
+    { stage:'quantum', artist:'CRISTOPH', start:'10:00pm', end:'11:00pm', genre:'techno' },
+    { stage:'quantum', artist:'ELI & FUR', start:'11:00pm', end:'12:00am', genre:'trance' },
+    { stage:'quantum', artist:'TINLICKER', start:'12:00am', end:'1:00am', genre:'trance' },
+    { stage:'quantum', artist:'CASSIAN', start:'1:00am', end:'2:15am', genre:'trance' },
+    { stage:'quantum', artist:'MASSANO', start:'2:15am', end:'3:30am', genre:'techno' },
+    { stage:'quantum', artist:'INNELLEA', start:'3:30am', end:'4:30am', genre:'techno' },
+    { stage:'quantum', artist:'KREAM', start:'4:30am', end:'5:30am', genre:'trance' },
+    // Wasteland
+    { stage:'wasteland', artist:'SIHK', start:'7:00pm', end:'8:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'CLAWZ', start:'8:30pm', end:'9:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'THE PURGE', start:'9:30pm', end:'10:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'YOSUF', start:'10:30pm', end:'11:30pm', genre:'hardstyle' },
+    { stage:'wasteland', artist:'DJ ISAAC', start:'11:30pm', end:'12:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'VIEZE ASBAK', start:'12:30am', end:'1:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'SUB ZERO PROJECT', start:'1:30am', end:'2:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'ROOLER', start:'2:30am', end:'3:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'WARFACE', start:'3:30am', end:'4:30am', genre:'hardstyle' },
+    { stage:'wasteland', artist:'MADGRRL B2B VESSEL', start:'4:30am', end:'5:30am', genre:'hardstyle' },
+    // Stereobloom
+    { stage:'stereobloom', artist:'KLO', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'stereobloom', artist:'MURPHY\'S LAW', start:'8:00pm', end:'9:15pm', genre:'house' },
+    { stage:'stereobloom', artist:'SIDNEY CHARLES B2B BUSHBABY', start:'9:15pm', end:'10:30pm', genre:'house' },
+    { stage:'stereobloom', artist:'SKREAM', start:'10:30pm', end:'11:45pm', genre:'dubstep' },
+    { stage:'stereobloom', artist:'HAMDI', start:'11:45pm', end:'1:00am', genre:'bass' },
+    { stage:'stereobloom', artist:'CHRIS LORENZO B2B BULLET TOOTH', start:'1:00am', end:'2:15am', genre:'house/bass' },
+    { stage:'stereobloom', artist:'SILVA BUMPA', start:'2:15am', end:'3:30am', genre:'house' },
+    { stage:'stereobloom', artist:'MORGAN SEATREE', start:'3:30am', end:'4:30am', genre:'house' },
+    { stage:'stereobloom', artist:'LU.RE', start:'4:30am', end:'5:30am', genre:'house' },
+    // Bionic Jungle
+    { stage:'bionic', artist:'ALVES', start:'7:00pm', end:'8:30pm', genre:'house' },
+    { stage:'bionic', artist:'ISABELLA', start:'8:30pm', end:'10:30pm', genre:'house' },
+    { stage:'bionic', artist:'KINAHAU', start:'10:30pm', end:'12:00am', genre:'house' },
+    { stage:'bionic', artist:'TIGA', start:'12:00am', end:'1:30am', genre:'electro' },
+    { stage:'bionic', artist:'DJ TENNIS B2B RED AXES', start:'1:30am', end:'3:30am', genre:'house' },
+    { stage:'bionic', artist:'BELTRAN B2B SIMAS', start:'3:30am', end:'5:30am', genre:'house' },
+    // Casa Bacardi
+    { stage:'casa', artist:'ESPII', start:'7:00pm', end:'8:00pm', genre:'latin' },
+    { stage:'casa', artist:'SORAYA', start:'8:00pm', end:'9:00pm', genre:'latin' },
+    { stage:'casa', artist:'DOOZIE', start:'9:00pm', end:'10:00pm', genre:'latin' },
+    { stage:'casa', artist:'BROSA', start:'10:00pm', end:'11:15pm', genre:'latin' },
+    { stage:'casa', artist:'JUOS', start:'11:15pm', end:'1:30am', genre:'latin' },
+    { stage:'casa', artist:'ROMMII', start:'1:30am', end:'2:45am', genre:'latin' },
+    { stage:'casa', artist:'CLOSE FRIENDS ONLY', start:'2:45am', end:'4:00am', genre:'latin' },
+    { stage:'casa', artist:'B2B2B2B', start:'4:00am', end:'5:30am', genre:'latin' },
+    // Forest House
+    { stage:'forest', artist:'ASSEMBLY', start:'7:00pm', end:'8:00pm', genre:'house' },
+    { stage:'forest', artist:'WARD ANDREWS', start:'8:00pm', end:'9:00pm', genre:'house' },
+    { stage:'forest', artist:'NEON DELUZ', start:'9:00pm', end:'10:00pm', genre:'house' },
+    { stage:'forest', artist:'TENSTEPS', start:'10:00pm', end:'11:00pm', genre:'trance' },
+    { stage:'forest', artist:'JUST.SHAUN', start:'11:00pm', end:'12:00am', genre:'house' },
+    { stage:'forest', artist:'GOSHFATHER', start:'12:00am', end:'1:00am', genre:'house' },
+    { stage:'forest', artist:'SILVER PANDA', start:'1:00am', end:'2:00am', genre:'house' },
+    { stage:'forest', artist:'NEKTER', start:'2:00am', end:'3:00am', genre:'house' },
+    { stage:'forest', artist:'TIM CLARK', start:'3:00am', end:'4:00am', genre:'house' },
+    { stage:'forest', artist:'SYNNHAVEN', start:'4:00am', end:'5:30am', genre:'house' },
+    // YeeDC
+    { stage:'yeedc', artist:'JOHN PRICE', start:'7:00pm', end:'8:45pm', genre:'bass' },
+    { stage:'yeedc', artist:'BAD ASH', start:'8:45pm', end:'10:15pm', genre:'bass' },
+    { stage:'yeedc', artist:'SOMMER RAY', start:'10:15pm', end:'12:00am', genre:'bass' },
+    { stage:'yeedc', artist:'DISKO COWBOY', start:'12:00am', end:'1:30am', genre:'bass' },
+    { stage:'yeedc', artist:'ASHLEY WALLS', start:'1:30am', end:'3:15am', genre:'bass' },
+    { stage:'yeedc', artist:'WILLIE PAKE', start:'3:15am', end:'4:15am', genre:'bass' },
+    // Beatbox Art Car
+    { stage:'beatbox', artist:'CHASSI', start:'7:00pm', end:'8:15pm', genre:'varied' },
+    { stage:'beatbox', artist:'ODD LANGUAGE', start:'8:15pm', end:'9:30pm', genre:'varied' },
+    { stage:'beatbox', artist:'WOLFIE', start:'9:30pm', end:'10:45pm', genre:'varied' },
+    { stage:'beatbox', artist:'CHIBS', start:'10:45pm', end:'12:00am', genre:'varied' },
+    { stage:'beatbox', artist:'2DY4', start:'12:00am', end:'1:30am', genre:'varied' },
+    { stage:'beatbox', artist:'SQISHI', start:'1:30am', end:'3:00am', genre:'varied' },
+    { stage:'beatbox', artist:'SISTO', start:'3:00am', end:'4:15am', genre:'varied' },
+    { stage:'beatbox', artist:'VICIOUS', start:'4:15am', end:'5:30am', genre:'varied' },
+    // Insomniac Fridays (stage runs all 3 days)
+    { stage:'insomniac', artist:'KENDO', start:'7:00pm', end:'8:30pm', genre:'varied' },
+    { stage:'insomniac', artist:'MARS', start:'8:30pm', end:'9:45pm', genre:'varied' },
+    { stage:'insomniac', artist:'MARK LEWIS', start:'9:45pm', end:'11:00pm', genre:'varied' },
+    { stage:'insomniac', artist:'STEVE LORIA', start:'11:00pm', end:'12:15am', genre:'varied' },
+    { stage:'insomniac', artist:'FRANKIE BONES', start:'12:15am', end:'1:30am', genre:'varied' },
+    { stage:'insomniac', artist:'DONALD GLAUDE', start:'1:30am', end:'2:45am', genre:'varied' },
+    { stage:'insomniac', artist:'CHARLES FEELGOOD', start:'2:45am', end:'4:00am', genre:'varied' },
+    { stage:'insomniac', artist:'MARK E QUARK', start:'4:00am', end:'5:30am', genre:'varied' },
+  ]
+};
+
+
+// ============================================
+// STATE
+// ============================================
+let currentDay = 1;
+let myScheduleOnly = false;
+let selections = {}; // { day: { key: tier } }
+let notes = {}; // { key: noteText }
+let longPressTimer = null;
+let currentModalKey = null;
+
+// Load from localStorage + URL hash
+function loadState() {
+  try {
+    const saved = localStorage.getItem('edc2026-selections');
+    if (saved) selections = JSON.parse(saved);
+  } catch(e) {}
+  try {
+    const savedNotes = localStorage.getItem('edc2026-notes');
+    if (savedNotes) notes = JSON.parse(savedNotes);
+  } catch(e) {}
+  // URL hash override
+  if (location.hash.startsWith('#share=')) {
+    try {
+      const decoded = JSON.parse(decodeURIComponent(atob(location.hash.slice(7))));
+      if (decoded.selections) selections = decoded.selections;
+      if (decoded.notes) notes = decoded.notes;
+      if (decoded.day) currentDay = decoded.day;
+    } catch(e) {}
+  }
+}
+
+function persist() {
+  try {
+    localStorage.setItem('edc2026-selections', JSON.stringify(selections));
+    localStorage.setItem('edc2026-notes', JSON.stringify(notes));
+  } catch(e) {}
+}
+
+function getDisplayName(artist) {
+  const overrides = {
+    'ABOVE & BEYOND': 'ABOVE &amp;<br>BEYOND',
+    'CASTOR & POLLUX': 'CASTOR &amp;<br>POLLUX',
+    'WALKER & ROYCE B2B VNSSA': 'WALKER &amp; ROYCE&nbsp;<span class="b2b">B2B</span><br>VNSSA',
+    'DOCTOR P B2B FLUX PAVILION B2B FUNTCASE': 'DOCTOR P&nbsp;<span class="b2b">B2B</span><br>FLUX PAVILION&nbsp;<span class="b2b">B2B</span><br>FUNTCASE',
+    'CODE BLACK B2B AUDIOFREQ B2B TONESHIFTERZ': 'CODE BLACK&nbsp;<span class="b2b">B2B</span><br>AUDIOFREQ&nbsp;<span class="b2b">B2B</span><br>TONESHIFTERZ',
+    'JOSH BAKER B2B KETTAMA B2B PROSPA': 'JOSH BAKER&nbsp;<span class="b2b">B2B</span><br>KETTAMA&nbsp;<span class="b2b">B2B</span> PROSPA',
+    'CHRIS LORENZO B2B BULLET TOOTH': 'CHRIS LORENZO&nbsp;<span class="b2b">B2B</span><br>BULLET TOOTH',
+    'BAD BOOMBOX B2B OLLIE LISHMAN': 'BAD BOOMBOX&nbsp;<span class="b2b">B2B</span><br>OLLIE LISHMAN',
+    'HEIDI LAWDEN B2B MASHA MAR': 'HEIDI LAWDEN&nbsp;<span class="b2b">B2B</span><br>MASHA MAR',
+    'SIDNEY CHARLES B2B BUSHBABY': 'SIDNEY CHARLES&nbsp;<span class="b2b">B2B</span><br>BUSHBABY',
+    'LAIDBACK LUKE B2B CHUCKIE': 'LAIDBACK LUKE&nbsp;<span class="b2b">B2B</span><br>CHUCKIE',
+    'HAAI B2B LUKE ALESSI': 'HAAI&nbsp;<span class="b2b">B2B</span><br>LUKE ALESSI',
+    'INTER PLANETARY CRIMINAL': 'INTER PLANETARY<br>CRIMINAL',
+    'BLACK TIGER SEX MACHINE': 'BLACK TIGER<br>SEX MACHINE',
+    'MASSIMILIANO PAGLIARA': 'MASSIMILIANO<br>PAGLIARA',
+    'FESTER, OSCURE & THEE-O': 'FESTER, OSCURE<br>&amp; THEE-O',
+    'DJ TENNIS B2B CHLOE CAILLET': 'DJ TENNIS&nbsp;<span class="b2b">B2B</span> CHLOE CAILLET',
+    'DJ TENNIS B2B RED AXES': 'DJ TENNIS&nbsp;<span class="b2b">B2B</span> RED AXES',
+    'BASHKKA B2B SEDEF ADASI': 'BASHKKA&nbsp;<span class="b2b">B2B</span> SEDEF ADASI',
+    'SALUTE B2B CHLOE CAILLET': 'SALUTE&nbsp;<span class="b2b">B2B</span> CHLOE CAILLET',
+    'BOOGIE T B2B DISTINCT MOTIVE': 'BOOGIE T&nbsp;<span class="b2b">B2B</span> DISTINCT MOTIVE',
+    'NICO MORENO B2B HOLY PRIEST': 'NICO MORENO&nbsp;<span class="b2b">B2B</span> HOLY PRIEST',
+    'AHEE B2B LIQUID STRANGER': 'AHEE&nbsp;<span class="b2b">B2B</span> LIQUID STRANGER',
+    'ABANA B2B JULIET MENDOZA': 'ABANA&nbsp;<span class="b2b">B2B</span> JULIET MENDOZA',
+    'MAX DEAN B2B LUKE DEAN': 'MAX DEAN&nbsp;<span class="b2b">B2B</span> LUKE DEAN',
+    'LADY FAITH B2B LNY TNZ': 'LADY FAITH&nbsp;<span class="b2b">B2B</span> LNY TNZ',
+    'ROB GEE B2B LENNY DEE': 'ROB GEE&nbsp;<span class="b2b">B2B</span> LENNY DEE',
+    'INFEKT B2B SAMPLIFIRE': 'INFEKT&nbsp;<span class="b2b">B2B</span> SAMPLIFIRE',
+    'EPTIC B2B SPACE LACES': 'EPTIC&nbsp;<span class="b2b">B2B</span> SPACE LACES',
+    'PEGGY GOU B2B KI/KI': 'PEGGY GOU&nbsp;<span class="b2b">B2B</span> KI/KI',
+    'DJ GIGOLA B2B MCR-T': 'DJ GIGOLA&nbsp;<span class="b2b">B2B</span> MCR-T',
+  };
+  if (overrides[artist]) return overrides[artist];
+  return artist
+    .replace(/\s+B2B\s+/g, '&nbsp;<span class="b2b">B2B</span> ')
+    .replace(/\s+&\s+/g, '&nbsp;&amp;&nbsp;');
+}
+
+function setKey(set) { return `${set.stage}|${set.artist}|${set.start}`; }
+
+function getTier(day, key) {
+  return (selections[day] && selections[day][key]) || 'off';
+}
+
+function setTier(day, key, tier) {
+  if (!selections[day]) selections[day] = {};
+  if (tier === 'off') delete selections[day][key];
+  else selections[day][key] = tier;
+  persist();
+}
+
+// ============================================
+// TIME PARSING
+// ============================================
+function parseTime(t, day) {
+  const cfg = DAY_CONFIG[day];
+  const m = t.replace(/\s+/g,'').match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1]);
+  const min = parseInt(m[2]);
+  const ampm = m[3].toLowerCase();
+  if (ampm === 'pm' && h !== 12) h += 12;
+  if (ampm === 'am' && h === 12) h = 0;
+  let totalMin = h * 60 + min;
+  if (totalMin < cfg.startMin) totalMin += 24 * 60;
+  return totalMin - cfg.startMin;
+}
+
+function fmtTime(t) {
+  return t.replace(':00', '').replace(/(am|pm)/i, m => m.toUpperCase());
+}
+
+function formatTime24(t) {
+  const m = t.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+  let h = parseInt(m[1]);
+  const min = m[2];
+  const ampm = m[3].toLowerCase();
+  if (ampm === 'pm' && h !== 12) h += 12;
+  if (ampm === 'am' && h === 12) h = 0;
+  return `${String(h).padStart(2,'0')}:${min}`;
+}
+
+// ============================================
+// GRID RENDERING
+// ============================================
+const grid = document.getElementById('grid');
+const gridWrap = document.getElementById('gridWrap');
+
+function renderGrid(day) {
+  grid.innerHTML = '';
+  const cfg = DAY_CONFIG[day];
+  const data = LINEUP[day] || [];
+  const pxPerMin = fontPxPerMin[fontIdx] || cfg.pxPerMin;
+  const totalMin = cfg.endMin - cfg.startMin;
+  const totalHeight = totalMin * pxPerMin;
+
+  // Set grid height
+  grid.style.gridTemplateRows = `var(--header-height) ${totalHeight}px`;
+
+  // Stage headers row
+  const corner = document.createElement('div');
+  corner.className = 'corner';
+  grid.appendChild(corner);
+
+  STAGES.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'stage-header';
+    el.style.setProperty('--stage-color', s.color);
+    el.innerHTML = `<div class="name">${s.name}</div>`;
+    grid.appendChild(el);
+  });
+
+  // Time column
+  const timeCol = document.createElement('div');
+  timeCol.className = 'time-col';
+  timeCol.style.height = totalHeight + 'px';
+
+  const hours = [];
+  for (let h = 0; h <= Math.ceil(totalMin/60); h++) {
+    const min = h * 60;
+    if (min > totalMin) break;
+    const realMin = cfg.startMin + min;
+    const realH = Math.floor(realMin / 60) % 24;
+    const ampm = realH >= 12 ? 'PM' : 'AM';
+    const displayH = realH % 12 || 12;
+    hours.push({ min, label: `${displayH} ${ampm}`, first: h === 0 });
+  }
+  hours.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'time-marker' + (h.first ? ' first' : '');
+    el.style.top = (h.min * pxPerMin) + 'px';
+    el.textContent = h.label;
+    timeCol.appendChild(el);
+  });
+  grid.appendChild(timeCol);
+
+  // Stage columns with sets
+  STAGES.forEach(s => {
+    const col = document.createElement('div');
+    col.className = 'stage-col';
+    col.style.setProperty('--stage-color', s.color);
+    col.style.height = totalHeight + 'px';
+
+    const sets = data.filter(set => set.stage === s.id);
+    sets.forEach(set => {
+      const startMin = parseTime(set.start, day);
+      const endMin = parseTime(set.end, day);
+      if (startMin === null || endMin === null) return;
+
+      const GAP = 3;
+      const top = startMin * pxPerMin + GAP;
+      const height = (endMin - startMin) * pxPerMin - GAP * 2;
+      const key = setKey(set);
+      const tier = getTier(day, key);
+
+      const el = document.createElement('div');
+      el.className = 'set tier-' + tier;
+      el.style.setProperty('--stage-color', s.color);
+      el.style.top = top + 'px';
+      el.style.height = height + 'px';
+      el.dataset.key = key;
+      el.dataset.day = day;
+      const noteIndicator = notes[key] ? '<span class="note-dot"></span>' : '';
+      // Special display overrides
+      const displayName = getDisplayName(set.artist);
+      el.innerHTML = `
+        <div class="artist">${displayName}${noteIndicator}</div>
+        <div class="time">${fmtTime(set.start)}–${fmtTime(set.end)}</div>
+        ${set.genre ? `<div class="genre">${set.genre}</div>` : ''}
+      `;
+
+      // Tap to cycle tier
+      el.addEventListener('click', (e) => {
+        if (el.dataset.longPressed) {
+          delete el.dataset.longPressed;
+          return;
+        }
+        const currentTier = getTier(day, key);
+        const nextTierIndex = (TIERS.indexOf(currentTier) + 1) % TIERS.length;
+        const nextTier = TIERS[nextTierIndex];
+        setTier(day, key, nextTier);
+        el.className = 'set tier-' + nextTier;
+        const artistEl = el.querySelector('.artist');
+        artistEl.innerHTML = getDisplayName(set.artist) + (notes[key] ? '<span class="note-dot"></span>' : '');
+        updateUI();
+      });
+
+      // Long press for notes
+      el.addEventListener('mousedown', () => startLongPress(el, key, set));
+      el.addEventListener('touchstart', () => startLongPress(el, key, set), {passive:true});
+      el.addEventListener('mouseup', cancelLongPress);
+      el.addEventListener('mouseleave', cancelLongPress);
+      el.addEventListener('touchend', cancelLongPress);
+
+      col.appendChild(el);
+    });
+
+    grid.appendChild(col);
+  });
+
+  applySearch();
+  detectConflicts(day);
+}
+
+function startLongPress(el, key, set) {
+  longPressTimer = setTimeout(() => {
+    el.dataset.longPressed = 'true';
+    openModal(key, set);
+  }, 600);
+}
+function cancelLongPress() {
+  if (longPressTimer) clearTimeout(longPressTimer);
+}
+
+// ============================================
+// MODAL
+// ============================================
+function openModal(key, set) {
+  currentModalKey = key;
+  document.getElementById('modalTitle').textContent = `Note: ${set.artist}`;
+  document.getElementById('modalNote').value = notes[key] || '';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  currentModalKey = null;
+}
+function saveModalNote() {
+  if (currentModalKey) {
+    const text = document.getElementById('modalNote').value.trim();
+    if (text) notes[currentModalKey] = text;
+    else delete notes[currentModalKey];
+    persist();
+    renderGrid(currentDay);
+  }
+  closeModal();
+}
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+// ============================================
+// CONFLICT DETECTION
+// ============================================
+function detectConflicts(day) {
+  const data = LINEUP[day] || [];
+  // PART tier is intentional — only flag MUST vs MUST overlaps
+  const mustSets = data.filter(s => getTier(day, setKey(s)) === 'must');
+  const conflicts = [];
+
+  for (let i = 0; i < mustSets.length; i++) {
+    for (let j = i + 1; j < mustSets.length; j++) {
+      const a = mustSets[i], b = mustSets[j];
+      const aStart = parseTime(a.start, day), aEnd = parseTime(a.end, day);
+      const bStart = parseTime(b.start, day), bEnd = parseTime(b.end, day);
+      if (aStart < bEnd && bStart < aEnd) {
+        conflicts.push(`${a.artist} ↔ ${b.artist}`);
+      }
+    }
+  }
+
+  const banner = document.getElementById('conflictBanner');
+  const text = document.getElementById('conflictText');
+  if (conflicts.length) {
+    banner.classList.add('show');
+    text.textContent = `${conflicts.length} conflict${conflicts.length>1?'s':''}: ${conflicts.join(' · ')}`;
+    // Mark conflicting sets
+    document.querySelectorAll('.set.tier-must').forEach(el => {
+      const key = el.dataset.key;
+      const set = data.find(s => setKey(s) === key);
+      if (set) {
+        const hasConflict = mustSets.some(other => {
+          if (setKey(other) === key) return false;
+          const s1 = parseTime(set.start, day), e1 = parseTime(set.end, day);
+          const s2 = parseTime(other.start, day), e2 = parseTime(other.end, day);
+          return s1 < e2 && s2 < e1;
+        });
+        el.classList.toggle('conflict', hasConflict);
+      }
+    });
+  } else {
+    banner.classList.remove('show');
+    document.querySelectorAll('.set.tier-must.conflict').forEach(el => el.classList.remove('conflict'));
+  }
+}
+
+// ============================================
+// UI UPDATES
+// ============================================
+function updateUI() {
+  const data = LINEUP[currentDay] || [];
+  const counts = { off:0, want:0, must:0, part:0 };
+  data.forEach(s => { const t = getTier(currentDay, setKey(s)); if (counts[t] !== undefined) counts[t]++; });
+
+  // Update counters
+  const el = (id) => document.getElementById(id);
+  if (el('countMust'))  el('countMust').textContent  = counts.must;
+  if (el('countWant'))  el('countWant').textContent  = counts.want;
+  if (el('countPart'))  el('countPart').textContent  = counts.part;
+
+  // Update day tab counts
+  Object.entries({ 1: LINEUP[1], 2: LINEUP[2], 3: LINEUP[3] }).forEach(([d, sets]) => {
+    const el2 = document.getElementById(`dayCount${d}`);
+    if (el2) el2.textContent = (sets || []).length + ' sets';
+  });
+
+  detectConflicts(currentDay);
+}
+
+// Search toggle
+const searchToggleBtn = document.getElementById('searchToggleBtn');
+const sheetSearch = document.getElementById('sheetSearch');
+if (searchToggleBtn && sheetSearch) {
+  searchToggleBtn.addEventListener('click', () => {
+    const visible = sheetSearch.style.display !== 'none';
+    sheetSearch.style.display = visible ? 'none' : 'block';
+    if (!visible) setTimeout(() => document.getElementById('searchInput')?.focus(), 100);
+    searchToggleBtn.classList.toggle('active', !visible);
+  });
+}
+
+// Export menu toggle
+const exportBtnSheet = document.getElementById('exportBtn');
+const exportMenuSheet = document.getElementById('exportMenuSheet');
+if (exportBtnSheet && exportMenuSheet) {
+  exportBtnSheet.addEventListener('click', () => {
+    const visible = exportMenuSheet.style.display !== 'none';
+    exportMenuSheet.style.display = visible ? 'none' : 'block';
+    exportBtnSheet.classList.toggle('active', !visible);
+  });
+}
+
+// ============================================
+// BOTTOM SHEET
+// ============================================
+const bottomSheet   = document.getElementById('bottomSheet');
+const sheetHandle   = document.getElementById('sheetHandleArea');
+const fabBackdrop2  = document.getElementById('fabBackdrop');
+
+function toggleSheet(expand) {
+  const isExpanded = bottomSheet.classList.contains('expanded');
+  const toExpand = expand ?? !isExpanded;
+  bottomSheet.classList.toggle('expanded', toExpand);
+  fabBackdrop2.classList.toggle('show', toExpand);
+}
+
+sheetHandle.addEventListener('click', () => toggleSheet());
+fabBackdrop2.addEventListener('click', () => toggleSheet(false));
+
+// ≡ MORE button wired in HTML as id="fabBtn"
+const fabBtn2 = document.getElementById('fabBtn');
+if (fabBtn2) fabBtn2.addEventListener('click', () => toggleSheet(true));
+
+// Swipe up on sheet peek to expand
+let sheetTouchY = 0;
+bottomSheet.addEventListener('touchstart', e => { sheetTouchY = e.touches[0].clientY; }, { passive: true });
+bottomSheet.addEventListener('touchend', e => {
+  const dy = e.changedTouches[0].clientY - sheetTouchY;
+  if (dy < -40) toggleSheet(true);
+  if (dy > 40)  toggleSheet(false);
+}, { passive: true });
+
+// ============================================
+// DAY TABS
+// ============================================
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-bar .day-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentDay = parseInt(tab.dataset.day);
+
+    // All days have verified data
+    document.getElementById('tbaBanner').classList.remove('show');
+
+    renderGrid(currentDay);
+    updateUI();
+    startNowLine(currentDay);
+    applyFriendOverlay();
+  });
+});
+
+// ============================================
+// VIEW TOGGLE
+// ============================================
+['viewToggle','fabViewToggle'].forEach(id => { const b = document.getElementById(id); if(b) b.addEventListener('click', () => {
+  myScheduleOnly = !myScheduleOnly;
+  document.getElementById('viewToggle').classList.toggle('active', myScheduleOnly);
+  gridWrap.classList.toggle('my-schedule', myScheduleOnly);
+}); });
+
+// ============================================
+// SEARCH
+// ============================================
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  applySearch(e.target.value);
+});
+
+function applySearch(query) {
+  query = query || document.getElementById('searchInput').value;
+  const q = query.toLowerCase().trim();
+  let firstMatch = null;
+  document.querySelectorAll('.set').forEach(el => {
+    const artist = el.querySelector('.artist').textContent.toLowerCase();
+    const genre = (el.querySelector('.genre')?.textContent || '').toLowerCase();
+    if (!q) {
+      el.classList.remove('search-match', 'search-hide');
+    } else if (artist.includes(q) || genre.includes(q)) {
+      el.classList.add('search-match');
+      el.classList.remove('search-hide');
+      if (!firstMatch) firstMatch = el;
+    } else {
+      el.classList.add('search-hide');
+      el.classList.remove('search-match');
+    }
+  });
+  if (firstMatch) {
+    firstMatch.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+}
+
+// ============================================
+// RESET
+// ============================================
+document.getElementById('resetBtn').addEventListener('click', () => {
+  const count = Object.values(selections[currentDay] || {}).filter(t => t !== 'off').length;
+  if (count === 0) return;
+  if (!confirm(`Clear all ${count} selections for Day ${currentDay}?`)) return;
+  selections[currentDay] = {};
+  persist();
+  renderGrid(currentDay);
+  updateUI();
+});
+
+// ============================================
+// EXPORT MENU
+// ============================================
+const exportBtnEl = document.getElementById('exportBtn');
+if (exportBtnEl) exportBtnEl.addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('exportMenu').classList.toggle('show');
+});
+document.addEventListener('click', () => {
+  const em = document.getElementById('exportMenu');
+  if (em) em.classList.remove('show');
+});
+
+// ============================================
+// PNG EXPORT
+// ============================================
+function exportPNG(fullGrid) {
+  const wasMySchedule = myScheduleOnly;
+  if (!fullGrid) {
+    gridWrap.classList.add('my-schedule');
+  } else {
+    gridWrap.classList.remove('my-schedule');
+  }
+
+  html2canvas(gridWrap, {
+    backgroundColor: '#08080f',
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `edc2026-day${currentDay}-${fullGrid?'full':'myschedule'}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+
+    if (wasMySchedule) gridWrap.classList.add('my-schedule');
+    else gridWrap.classList.remove('my-schedule');
+  });
+}
+
+// ============================================
+// ICS EXPORT
+// ============================================
+function exportICS() {
+  const data = LINEUP[currentDay] || [];
+  const picks = data.filter(s => {
+    const t = getTier(currentDay, setKey(s));
+    return t === 'must' || t === 'want';
+  });
+
+  if (!picks.length) { alert('No picks to export!'); return; }
+
+  const dates = ['20260515','20260516','20260517'];
+  let ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//EDC LV 2026//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n`;
+
+  picks.forEach(s => {
+    // Parse start/end as 24h, advance date if AM (past midnight)
+    function toDateTime(t, baseDate) {
+      const m = t.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+      let h = parseInt(m[1]);
+      const min = m[2];
+      const ampm = m[3].toLowerCase();
+      if (ampm === 'pm' && h !== 12) h += 12;
+      if (ampm === 'am' && h === 12) h = 0;
+      // AM times (0-11) are after midnight → next calendar day
+      const date = (ampm === 'am' && h < 12)
+        ? String(parseInt(baseDate) + 1)
+        : baseDate;
+      return `${date}T${String(h).padStart(2,'0')}${min}00`;
+    }
+    const baseDate = dates[currentDay - 1];
+    const startDT = toDateTime(s.start, baseDate);
+    const endDT = toDateTime(s.end, baseDate);
+    const stage = STAGES.find(st => st.id === s.stage)?.name || s.stage;
+    ics += `BEGIN:VEVENT\r\nUID:${setKey(s)}@edc2026\r\nDTSTART;TZID=America/Los_Angeles:${startDT}\r\nDTEND;TZID=America/Los_Angeles:${endDT}\r\nSUMMARY:${s.artist} @ ${stage}\r\nDESCRIPTION:Stage: ${stage}\\nGenre: ${s.genre || 'N/A'}\\nTier: ${getTier(currentDay, setKey(s))}\r\nLOCATION:Las Vegas Motor Speedway - ${stage}\r\nEND:VEVENT\r\n`;
+  });
+
+  ics += 'END:VCALENDAR';
+
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const link = document.createElement('a');
+  link.download = `edc2026-day${currentDay}.ics`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+}
+
+// ============================================
+// SHARE URL
+// ============================================
+function copyShareURL() {
+  const payload = { selections, notes, day: currentDay };
+  const hash = btoa(encodeURIComponent(JSON.stringify(payload)));
+  const url = `${location.origin}${location.pathname}#share=${hash}`;
+  navigator.clipboard.writeText(url).then(() => {
+    alert('Share link copied to clipboard!');
+  }).catch(() => {
+    prompt('Copy this link:', url);
+  });
+}
+
+// ============================================
+// STAGE WALK TIMES (minutes, approximate EDC map)
+// ============================================
+const WALK_TIMES = {
+  'kinetic|circuit':3,  'kinetic|cosmic':4,   'kinetic|basspod':6,
+  'kinetic|neon-garden':9, 'kinetic|quantum':7, 'kinetic|wasteland':13,
+  'kinetic|stereobloom':9, 'kinetic|bionic':11, 'kinetic|casa':10,
+  'kinetic|forest':13,  'kinetic|yeedc':12,   'kinetic|beatbox':8,
+  'kinetic|insomniac':10,
+  'circuit|cosmic':5,   'circuit|basspod':4,  'circuit|neon-garden':7,
+  'circuit|quantum':8,  'circuit|wasteland':11, 'circuit|stereobloom':8,
+  'circuit|bionic':9,   'circuit|casa':9,     'circuit|forest':12,
+  'circuit|yeedc':11,   'circuit|beatbox':6,  'circuit|insomniac':8,
+  'cosmic|basspod':6,   'cosmic|neon-garden':8, 'cosmic|quantum':9,
+  'cosmic|wasteland':12, 'cosmic|stereobloom':10, 'cosmic|bionic':8,
+  'cosmic|casa':11,     'cosmic|forest':11,   'cosmic|yeedc':13,
+  'basspod|neon-garden':5, 'basspod|quantum':7, 'basspod|wasteland':9,
+  'basspod|stereobloom':7, 'basspod|bionic':7, 'basspod|casa':8,
+  'basspod|forest':10,  'basspod|yeedc':10,   'basspod|beatbox':5,
+  'neon-garden|quantum':6, 'neon-garden|wasteland':8, 'neon-garden|stereobloom':9,
+  'neon-garden|bionic':6, 'neon-garden|casa':7, 'neon-garden|forest':9,
+  'quantum|wasteland':9, 'quantum|stereobloom':10, 'quantum|bionic':8,
+  'wasteland|stereobloom':7, 'wasteland|bionic':9, 'wasteland|beatbox':7,
+  'stereobloom|bionic':6, 'stereobloom|casa':7, 'stereobloom|forest':8,
+  'bionic|casa':5,      'bionic|forest':7,    'bionic|beatbox':6,
+  'casa|forest':4,      'casa|yeedc':6,       'forest|yeedc':5,
+};
+function getWalkMins(a, b) {
+  if (a === b) return 0;
+  return WALK_TIMES[`${a}|${b}`] || WALK_TIMES[`${b}|${a}`] || 8;
+}
+
+// ============================================
+// PARTIAL SET INFERENCE
+// ============================================
+function inferPartialWindow(day, partSet) {
+  const cfg = DAY_CONFIG[day];
+  const data = LINEUP[day] || [];
+  const partStart = cfg.startMin + parseTime(partSet.start, day);
+  const partEnd   = cfg.startMin + parseTime(partSet.end, day);
+
+  // Find all MUST picks sorted by time
+  const musts = data
+    .filter(s => getTier(day, setKey(s)) === 'must')
+    .map(s => ({
+      ...s,
+      absStart: cfg.startMin + parseTime(s.start, day),
+      absEnd:   cfg.startMin + parseTime(s.end, day),
+    }))
+    .sort((a,b) => a.absStart - b.absStart);
+
+  // Find the MUST that ends just before or during this PART set
+  const prevMust = musts.filter(m => m.absEnd <= partEnd && m.absEnd >= partStart)
+    .sort((a,b) => b.absEnd - a.absEnd)[0];
+
+  // Find the MUST that starts just after or during this PART set
+  const nextMust = musts.filter(m => m.absStart >= partStart && m.absStart <= partEnd)
+    .sort((a,b) => a.absStart - b.absStart)[0];
+
+  const arriveAt = prevMust ? prevMust.absEnd : partStart;
+  const leaveAt  = nextMust ? nextMust.absStart : partEnd;
+  const totalMin = partEnd - partStart;
+  const stayMin  = Math.max(0, leaveAt - arriveAt);
+  const pct      = totalMin > 0 ? stayMin / totalMin : 0;
+
+  return { arriveAt, leaveAt, stayMin, totalMin, pct, prevMust, nextMust };
+}
+
+function fmtAbsMin(absMin) {
+  let h = Math.floor(absMin / 60) % 24;
+  const m = absMin % 60;
+  const ampm = h >= 12 ? 'AM' : 'AM';
+  const disp = h % 12 === 0 ? 12 : h % 12;
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  return `${disp}:${String(m).padStart(2,'0')}${suffix}`;
+}
+
+// ============================================
+// WALLPAPER EXPORT
+// ============================================
+// ============================================================
+// WALLPAPER EXPORT — 5 styles
+// ============================================================
+
+let _wallpaperStyle = 0; // 0=itinerary,1=poster,2=clock,3=minimal,4=neon,5=stubs
+// (0 = original itinerary kept as default; 1-5 are new styles)
+
+const STYLE_NAMES = ['ITINERARY','POSTER','CLOCK','MINIMAL','NEON GLOW','TICKET STUBS'];
+
+// Walk time table — uses existing WALK_TIMES + getWalkMins
+function getWalkTime(a, b) { return getWalkMins(a, b); }
+
+// Common helpers
+function canvasGradBg(ctx, W, H) {
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#08080f'); g.addColorStop(1,'#0d0d18');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+}
+function hexToRgb(h) {
+  const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
+  return [r,g,b];
+}
+function rgba(hex,a){const[r,g,b]=hexToRgb(hex);return `rgba(${r},${g},${b},${a})`;}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+// Aliases for wallpaper functions (reference existing consts)
+const STAGE_NAMES_FULL = {
+  kinetic:'kineticFIELD', circuit:'circuitGROUNDS', cosmic:'cosmicMEADOW',
+  basspod:'bassPOD', 'neon-garden':'neonGARDEN', quantum:'quantumVALLEY',
+  wasteland:'wasteLAND', stereobloom:'stereoBLOOM', bionic:'bionicJUNGLE',
+};
+const TIER_COLS  = { must:'#ff1493', want:'#ffd60a', part:'#aaaacc' };
+const WP_WP_TIER_ICONS = { must:'♥', want:'★', part:'◑' };
+const DAY_LABELS = {1:'DAY 1  ·  FRIDAY MAY 15',2:'DAY 2  ·  SATURDAY MAY 16',3:'DAY 3  ·  SUNDAY MAY 17'};
+
+function getPicks(day) {
+  const cfg = DAY_CONFIG[day];
+  const data = LINEUP[day] || [];
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset()*60000;
+  const lv  = new Date(utc + -7*3600000);
+  let nowMin = lv.getHours()*60 + lv.getMinutes();
+  if (nowMin < 6*60) nowMin += 24*60;
+
+  return data
+    .filter(s => ['must','want','part'].includes(getTier(day, setKey(s))))
+    .map(s => {
+      const absStart = cfg.startMin + parseTime(s.start, day);
+      const absEnd   = cfg.startMin + parseTime(s.end, day);
+      const tier     = getTier(day, setKey(s));
+      const isPast   = absEnd < nowMin;
+      const isNow    = absStart <= nowMin && absEnd > nowMin;
+      const col      = STAGE_COLS[s.stage] || '#888888';
+      const stageFull= STAGE_NAMES_FULL[s.stage] || s.stage;
+      const durMin   = absEnd - absStart;
+      const inf      = tier === 'part' ? inferPartialWindow(day, s) : null;
+      return { ...s, absStart, absEnd, tier, isPast, isNow, col, stageFull, durMin, inf };
+    })
+    .sort((a,b) => a.absStart - b.absStart);
+}
+
+function fmtDur(m) {
+  const h=Math.floor(m/60), mn=m%60;
+  return h ? `${h}H ${String(mn).padStart(2,'0')}M` : `${mn}M`;
+}
+
+function drawEdcLogo(ctx, img, cx, y, maxW, maxH) {
+  // Always use text — avoids tainted canvas from cross-origin image
+  ctx.fillStyle = '#ff1493';
+  ctx.font = '900 72px Outfit, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('EDC', cx, y + 60);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = 'bold 22px DM Mono, monospace';
+  ctx.fillText('LAS VEGAS 2026', cx, y + 90);
+  return 100;
+}
+
+function drawFwBar(ctx, W, y, h=60) {
+  const grad = ctx.createLinearGradient(60,0,W-60,0);
+  ['#ff2a6d','#ff8800','#ffd60a','#39ff14','#00d9ff','#b026ff'].forEach((c,i,a)=>
+    grad.addColorStop(i/(a.length-1), rgba(c,0.2)));
+  ctx.fillStyle=grad;
+  roundRect(ctx,60,y+8,W-120,h-16,12); ctx.fill();
+  ctx.strokeStyle='rgba(160,128,0,0.3)'; ctx.lineWidth=1.5;
+  roundRect(ctx,60,y+8,W-120,h-16,12); ctx.stroke();
+  ctx.fillStyle='#ffd60a'; ctx.font='bold 28px DM Mono, monospace'; ctx.textAlign='center';
+  ctx.fillText('🎆  1:40 AM  FIREWORKS  ·  cosmicMEADOW  🎆', W/2, y+h/2+10);
+  return h;
+}
+
+// ── STYLE 0: Itinerary (boarding pass) ──
+function drawStyle_itinerary(ctx, W, picks, day, logoImg) {
+  canvasGradBg(ctx, W, 99999);
+  const PAD=60, CARD=220, CONN=100;
+  let y=40;
+
+  // Logo
+  const lh = drawEdcLogo(ctx, logoImg, W/2, y, W-120, 110);
+  y += lh + 20;
+
+  // Day header
+  ctx.fillStyle='#0c0c1a'; ctx.fillRect(0,y,W,80);
+  ctx.fillStyle='#ff1493'; ctx.font='bold 44px Outfit, sans-serif';
+  ctx.textAlign='left'; ctx.fillText(DAY_LABELS[day].split('·')[0].trim(), PAD, y+50);
+  ctx.fillStyle='#333348'; ctx.font='400 28px DM Mono, monospace';
+  ctx.textAlign='right';
+  const now=new Date(); const utc=now.getTime()+now.getTimezoneOffset()*60000;
+  const lv=new Date(utc+-7*3600000);
+  ctx.fillText(`EXPORTED ${lv.getHours()%12||12}:${String(lv.getMinutes()).padStart(2,'0')}${lv.getHours()>=12?'PM':'AM'}`, W-PAD, y+50);
+  y+=80+20;
+
+  picks.forEach((p,i) => {
+    // Connector
+    if (i>0) {
+      const prev=picks[i-1];
+      const walk=getWalkTime(prev.stage, p.stage);
+      const gap=p.absStart - prev.absEnd;
+
+      // Thread
+      ctx.strokeStyle='rgba(30,30,50,1)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(PAD+18,y); ctx.lineTo(PAD+18,y+CONN); ctx.stroke();
+
+      // Walk pill
+      if (walk>0) {
+        const wc=walk>=10?'#ff8800':walk>=6?'#00d9ff':'#39ff14';
+        roundRect(ctx,PAD+40,y+8,320,52,26);
+        ctx.fillStyle=rgba(wc,0.12); ctx.fill();
+        ctx.strokeStyle=rgba(wc,0.5); ctx.lineWidth=1.5; ctx.stroke();
+        ctx.fillStyle=wc; ctx.font='bold 24px DM Mono, monospace'; ctx.textAlign='left';
+        ctx.fillText(`🚶  ~${walk} MIN  →  ${p.stageFull.toUpperCase().slice(0,12)}`, PAD+70, y+42);
+      }
+
+      // Gap pill
+      if (gap>0) {
+        const gc=gap>=20?'#50c878':'rgba(70,70,100,1)';
+        roundRect(ctx,PAD+40,y+72,240,44,22);
+        ctx.fillStyle=gap>=20?'rgba(8,22,12,1)':'rgba(14,14,22,1)'; ctx.fill();
+        ctx.strokeStyle=gc; ctx.lineWidth=1.5; ctx.stroke();
+        ctx.fillStyle=gc; ctx.font='bold 22px DM Mono, monospace'; ctx.textAlign='center';
+        ctx.fillText(gap>=15?`✦  FREE ${gap} MIN`:`GAP ${gap} MIN`, PAD+40+120, y+72+30);
+      }
+
+      // Conflict
+      if (prev.absEnd > p.absStart) {
+        roundRect(ctx,W-PAD-240,y+8,240,52,26);
+        ctx.fillStyle='rgba(30,8,8,1)'; ctx.fill();
+        ctx.strokeStyle='rgba(180,40,40,0.8)'; ctx.lineWidth=1.5; ctx.stroke();
+        ctx.fillStyle='#ff5050'; ctx.font='bold 24px DM Mono, monospace'; ctx.textAlign='center';
+        ctx.fillText('⚠ CONFLICT', W-PAD-120, y+42);
+      }
+
+      // Fireworks (1:40AM = 100 minutes past midnight = 1540 total)
+      const FW = 24*60+100; // 1:40AM next day
+      if (prev.absEnd <= FW && p.absStart >= FW) {
+        drawFwBar(ctx, W, y+CONN-70, 60);
+      }
+
+      y+=CONN;
+    }
+
+    // Card
+    const alpha=p.isPast?0.06:0.13;
+    roundRect(ctx,PAD,y,W-PAD*2,CARD-4,24);
+    ctx.fillStyle=rgba(p.col,alpha); ctx.fill();
+    if(p.isNow){ctx.strokeStyle=p.col;ctx.lineWidth=2;ctx.stroke();}
+
+    // Left accent bar
+    roundRect(ctx,PAD,y+14,8,CARD-32,4);
+    ctx.fillStyle=p.isPast?rgba(p.col,0.3):p.col; ctx.fill();
+
+    const fade=p.isPast?0.35:1;
+    const ax=PAD+40;
+
+    // Time
+    ctx.fillStyle=`rgba(130,130,165,${fade})`; ctx.font='bold 30px DM Mono, monospace'; ctx.textAlign='left';
+    ctx.fillText(fmtTime(p.start), ax, y+52);
+    ctx.fillStyle=`rgba(60,60,90,${fade})`; ctx.font='400 24px DM Mono, monospace';
+    ctx.fillText(`→ ${fmtTime(p.end)}`, ax, y+88);
+
+    // Duration pill
+    roundRect(ctx,ax,y+102,140,44,22);
+    ctx.fillStyle='rgba(20,15,30,1)'; ctx.fill();
+    ctx.strokeStyle='rgba(50,40,70,0.8)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle=`rgba(150,150,180,${fade})`; ctx.font='bold 22px DM Mono, monospace'; ctx.textAlign='center';
+    const durStr = p.tier==='part'&&p.inf ? `◑ ${p.inf.stayMin}M` : fmtDur(p.durMin);
+    ctx.fillText(durStr, ax+70, y+102+29);
+
+    // Tier icon
+    ctx.fillStyle=rgba(TIER_COLS[p.tier]||'#888',fade);
+    ctx.font='bold 52px system-ui, sans-serif'; ctx.textAlign='left';
+    ctx.fillText(WP_TIER_ICONS[p.tier]||'', ax, y+CARD-30);
+
+    // NOW badge
+    if(p.isNow){
+      roundRect(ctx,W-PAD-160,y+18,140,46,23);
+      ctx.fillStyle='#ff1493'; ctx.fill();
+      ctx.fillStyle='#000'; ctx.font='bold 24px DM Mono, monospace'; ctx.textAlign='center';
+      ctx.fillText('▶ NOW', W-PAD-80, y+49);
+    }
+    if(p.isPast){
+      ctx.fillStyle='rgba(35,35,55,0.9)'; ctx.font='bold 22px DM Mono, monospace'; ctx.textAlign='right';
+      ctx.fillText('DONE', W-PAD-28, y+36);
+    }
+
+    // Artist
+    ctx.fillStyle=`rgba(235,235,248,${fade})`; ctx.font='900 54px Outfit, sans-serif'; ctx.textAlign='left';
+    const maxArtistW=W-PAD*2-ax-PAD-120;
+    let artistName=p.artist;
+    while(ctx.measureText(artistName).width>maxArtistW&&artistName.length>4) artistName=artistName.slice(0,-1)+'…';
+    ctx.fillText(artistName, ax+200, y+68);
+
+    // Stage pill
+    const sw=ctx.measureText(p.stageFull).width+48;
+    roundRect(ctx,ax+200,y+88,sw,48,24);
+    ctx.fillStyle=rgba(p.col,0.18); ctx.fill();
+    ctx.strokeStyle=rgba(p.col,0.45); ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle=rgba(p.col,fade);
+    ctx.font='bold 24px DM Mono, monospace'; ctx.textAlign='center';
+    ctx.fillText(p.stageFull.toUpperCase(), ax+200+sw/2, y+88+32);
+
+    y+=CARD;
+  });
+
+  // Stats strip
+  y+=20;
+  ctx.fillStyle='#0a0a14'; ctx.fillRect(0,y,W,130);
+  ctx.strokeStyle='#1a1a2e'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(60,y); ctx.lineTo(W-60,y); ctx.stroke();
+  const totalDur=picks.reduce((s,p)=>s+(p.tier==='part'&&p.inf?p.inf.stayMin:p.durMin),0);
+  const stages=new Set(picks.map(p=>p.stage)).size;
+  const gaps=picks.slice(1).map((p,i)=>Math.max(0,p.absStart-picks[i].absEnd));
+  const maxGap=gaps.length?Math.max(...gaps):0;
+  const stats=[
+    [`${picks.length}`,`SETS`], [`${fmtDur(totalDur)}`,`ON FEET`],
+    [`${stages}`,`STAGES`], [maxGap?`${maxGap}M`:'–',`FREE`]
+  ];
+  const sw2=(W-120)/4;
+  stats.forEach(([val,lbl],i)=>{
+    const sx=60+i*sw2+sw2/2;
+    ctx.fillStyle='#ff1493'; ctx.font='bold 28px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(['◆','⏱','⬡','✦'][i], sx, y+36);
+    ctx.fillStyle='#e0e0f0'; ctx.font='bold 36px Outfit, sans-serif';
+    ctx.fillText(val, sx, y+82);
+    ctx.fillStyle='#333348'; ctx.font='400 20px DM Mono';
+    ctx.fillText(lbl, sx, y+110);
+  });
+  y+=130+30;
+
+  // Footer
+  ctx.strokeStyle='#1a1a2e'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(80,y); ctx.lineTo(W-80,y); ctx.stroke();
+  ctx.fillStyle='#222235'; ctx.font='400 22px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY', W/2, y+36);
+  y+=60;
+  return y;
+}
+
+// ── STYLE 1: Dark Poster ──
+function drawStyle_poster(ctx, W, picks, day, logoImg) {
+  const H=1920;
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#060610'); g.addColorStop(1,'#0a0818');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  // Watermark stage names
+  const stageList=Object.values(STAGE_NAMES_FULL);
+  stageList.forEach((s,i)=>{
+    const col=Object.values(STAGE_COLS)[i]||'#333';
+    ctx.fillStyle=rgba(col,0.055);
+    ctx.font=`bold ${90+i%3*20}px Outfit, sans-serif`; ctx.textAlign='center';
+    ctx.fillText(s.toUpperCase(), W/2+(i%2===0?0:40), 180+i*155);
+  });
+
+  // Logo
+  let y=40;
+  const lh=drawEdcLogo(ctx, logoImg, W/2, y, W-120, 140);
+  y+=lh+30;
+
+  ctx.fillStyle='rgba(14,14,24,0.7)'; ctx.fillRect(0,y,W,60);
+  ctx.fillStyle='#333348'; ctx.font='400 26px DM Mono'; ctx.textAlign='center';
+  ctx.fillText(DAY_LABELS[day], W/2, y+40);
+  y+=80;
+
+  // Highlighted sets
+  picks.forEach((p,i)=>{
+    if(p.isPast) { y+=110; return; }
+    const col=hexToRgb(p.col);
+    // Glow layers
+    for(let g2=6;g2>0;g2--){
+      ctx.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${g2*0.025})`;
+      ctx.font=`900 ${72+g2}px Outfit, sans-serif`; ctx.textAlign='center';
+      ctx.fillText(p.artist.length>12?p.artist.split(' ')[0]:p.artist, W/2, y+72);
+    }
+    ctx.fillStyle=p.col; ctx.font='900 72px Outfit, sans-serif'; ctx.textAlign='center';
+    ctx.fillText(p.artist.length>12?p.artist.split(' ')[0]:p.artist, W/2, y+72);
+
+    ctx.fillStyle=rgba(p.col,0.7); ctx.font='bold 26px DM Mono';
+    ctx.fillText(`${WP_TIER_ICONS[p.tier]}  ${fmtTime(p.start)}  ·  ${p.stageFull.toUpperCase()}`, W/2, y+110);
+
+    // Glow line
+    const gl=ctx.createLinearGradient(80,0,W-80,0);
+    gl.addColorStop(0,'transparent'); gl.addColorStop(0.5,rgba(p.col,0.4)); gl.addColorStop(1,'transparent');
+    ctx.strokeStyle=gl; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(80,y+128); ctx.lineTo(W-80,y+128); ctx.stroke();
+    y+=155;
+  });
+
+  // FW
+  drawFwBar(ctx,W,H-220,80);
+  ctx.fillStyle='#1a1a2e'; ctx.font='400 22px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY', W/2, H-40);
+  return H;
+}
+
+// ── STYLE 2: Clock Face ──
+function drawStyle_clock(ctx, W, picks, day, logoImg) {
+  const H=1920;
+  ctx.fillStyle='#07070e'; ctx.fillRect(0,0,W,H);
+
+  let y=40;
+  const lh=drawEdcLogo(ctx, logoImg, W/2, y, W-120, 130);
+  y+=lh+20;
+  ctx.fillStyle='#222238'; ctx.font='400 26px DM Mono'; ctx.textAlign='center';
+  ctx.fillText(DAY_LABELS[day], W/2, y+30); y+=60;
+
+  const cx=W/2, cy=y+440, R=380;
+  // Outer ring
+  ctx.strokeStyle='rgba(30,30,50,1)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle='rgba(20,20,35,1)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cx,cy,R-28,0,Math.PI*2); ctx.stroke();
+
+  // Hour ticks
+  for(let h=0;h<24;h++){
+    const ang=Math.PI*2*h/24-Math.PI/2;
+    const r1=R-2, r2=h%3===0?R-22:R-12;
+    ctx.strokeStyle=h%6===0?'rgba(60,60,90,1)':'rgba(28,28,44,1)';
+    ctx.lineWidth=h%6===0?2:1;
+    ctx.beginPath();
+    ctx.moveTo(cx+r1*Math.cos(ang),cy+r1*Math.sin(ang));
+    ctx.lineTo(cx+r2*Math.cos(ang),cy+r2*Math.sin(ang));
+    ctx.stroke();
+  }
+
+  // Hour labels
+  const cfg=DAY_CONFIG[day];
+  [17,19,21,23,1,3,5].forEach(h=>{
+    const hAdj=h<17?h+24:h;
+    const ang=Math.PI*2*(hAdj*60-cfg.startMin)/(cfg.endMin-cfg.startMin)-Math.PI/2;
+    const lx=cx+(R+26)*Math.cos(ang), ly=cy+(R+26)*Math.sin(ang);
+    ctx.fillStyle='rgba(60,60,90,1)';
+    ctx.font='bold 22px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(h<=12?`${h}${h<12?'AM':'PM'}`:h===17?'5PM':h===19?'7PM':h===21?'9PM':h===23?'11PM':'?', lx,ly+8);
+  });
+
+  // Set arcs
+  const totalMin=cfg.endMin-cfg.startMin;
+  picks.forEach(p=>{
+    const s=(p.absStart-cfg.startMin)/totalMin*Math.PI*2-Math.PI/2;
+    const e=(p.absEnd-cfg.startMin)/totalMin*Math.PI*2-Math.PI/2;
+    const col=p.col; const ar=R-40;
+    if(p.isPast){
+      ctx.strokeStyle=rgba(col,0.2); ctx.lineWidth=16;
+      ctx.beginPath(); ctx.arc(cx,cy,ar,s,e); ctx.stroke();
+    } else {
+      // Glow
+      ctx.strokeStyle=rgba(col,0.15); ctx.lineWidth=24;
+      ctx.beginPath(); ctx.arc(cx,cy,ar,s,e); ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=14;
+      ctx.beginPath(); ctx.arc(cx,cy,ar,s,e); ctx.stroke();
+      // Dot at start
+      ctx.fillStyle=col;
+      ctx.beginPath(); ctx.arc(cx+ar*Math.cos(s),cy+ar*Math.sin(s),9,0,Math.PI*2); ctx.fill();
+    }
+  });
+
+  // Fireworks arc at 1:40AM
+  const fwMin=(24*60+100)-cfg.startMin;
+  const fwAng=fwMin/totalMin*Math.PI*2-Math.PI/2;
+  ctx.strokeStyle='#ffd60a'; ctx.lineWidth=3; ctx.setLineDash([8,6]);
+  ctx.beginPath(); ctx.moveTo(cx+(R-70)*Math.cos(fwAng),cy+(R-70)*Math.sin(fwAng));
+  ctx.lineTo(cx+(R+50)*Math.cos(fwAng),cy+(R+50)*Math.sin(fwAng)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#ffd60a'; ctx.font='bold 22px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('🎆', cx+(R+66)*Math.cos(fwAng), cy+(R+66)*Math.sin(fwAng)+8);
+
+  // Centre
+  ctx.fillStyle='rgba(10,10,18,1)';
+  ctx.beginPath(); ctx.arc(cx,cy,110,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(25,25,40,1)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,110,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='#ff1493'; ctx.font='900 52px Outfit'; ctx.textAlign='center';
+  ctx.fillText(`D${day}`, cx, cy+20);
+  ctx.fillStyle='#333348'; ctx.font='400 24px DM Mono';
+  ctx.fillText(['FRI','SAT','SUN'][day-1]+' MAY '+[15,16,17][day-1], cx, cy+54);
+
+  // Legend
+  const legend_y=cy+R+60;
+  ctx.fillStyle='#1a1a28'; ctx.fillRect(60,legend_y,W-120,200); 
+  roundRect(ctx,60,legend_y,W-120,200,16); ctx.fillStyle='#0c0c1a'; ctx.fill();
+  picks.filter(p=>!p.isPast).slice(0,4).forEach((p,i)=>{
+    const lx=80, ly=legend_y+20+i*44;
+    ctx.fillStyle=rgba(p.col,0.9); ctx.font='bold 26px DM Mono'; ctx.textAlign='left';
+    ctx.fillText(`${WP_TIER_ICONS[p.tier]} ${fmtTime(p.start).padEnd(8)} ${p.artist.slice(0,18)}`, lx, ly+28);
+    ctx.fillStyle=rgba(p.col,0.45); ctx.font='400 20px DM Mono';
+    ctx.fillText(p.stageFull.toUpperCase(), lx+620, ly+28);
+  });
+
+  ctx.fillStyle='#1a1a28'; ctx.font='400 22px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY', W/2, H-40);
+  return H;
+}
+
+// ── STYLE 3: Minimal Card ──
+function drawStyle_minimal(ctx, W, picks, day, logoImg) {
+  const H=1920;
+  ctx.fillStyle='#07070e'; ctx.fillRect(0,0,W,H);
+
+  const now_pick=picks.find(p=>p.isNow)||picks.find(p=>!p.isPast)||picks[0];
+  const next_pick=picks[picks.indexOf(now_pick)+1];
+  if(!now_pick){
+    ctx.fillStyle='#333'; ctx.font='bold 48px Outfit'; ctx.textAlign='center';
+    ctx.fillText('NO PICKS FOR TODAY', W/2, H/2);
+    return H;
+  }
+
+  // Background col tint
+  const [r,g,b]=hexToRgb(now_pick.col);
+  ctx.fillStyle=`rgba(${r},${g},${b},0.04)`; ctx.fillRect(0,0,W,H);
+
+  let y=120;
+  const lh=drawEdcLogo(ctx, logoImg, W/2, y, W-160, 120);
+  y+=lh+40;
+
+  // NOW label
+  ctx.fillStyle='#ff1493'; ctx.font='bold 32px DM Mono'; ctx.textAlign='left';
+  ctx.fillText('▶ NOW', 80, y+38); 
+  ctx.fillStyle='rgba(50,50,80,1)'; ctx.textAlign='right';
+  ctx.fillText(now_pick.isNow?`${now_pick.absEnd-Math.floor(Date.now()/60000%1440+now_pick.absStart)} MIN LEFT`:'STARTING SOON', W-80, y+38);
+  y+=60;
+
+  // Big artist name
+  ctx.fillStyle=now_pick.col; ctx.font='900 110px Outfit'; ctx.textAlign='center';
+  const words=now_pick.artist.split(' ');
+  let line='', lineY=y;
+  words.forEach(w=>{
+    if(ctx.measureText(line+' '+w).width>W-160&&line){
+      ctx.fillText(line,W/2,lineY); line=w; lineY+=110;
+    } else line=(line?line+' ':'')+w;
+  });
+  ctx.fillText(line,W/2,lineY); y=lineY+60;
+
+  // Divider
+  const gd=ctx.createLinearGradient(80,0,W-80,0);
+  gd.addColorStop(0,'transparent'); gd.addColorStop(0.5,rgba(now_pick.col,0.5)); gd.addColorStop(1,'transparent');
+  ctx.strokeStyle=gd; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(80,y); ctx.lineTo(W-80,y); ctx.stroke(); y+=30;
+
+  // Stage pill
+  const spw=ctx.measureText(now_pick.stageFull).width+80;
+  roundRect(ctx,W/2-spw/2,y,spw,60,30);
+  ctx.fillStyle=rgba(now_pick.col,0.15); ctx.fill();
+  ctx.strokeStyle=rgba(now_pick.col,0.5); ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle=now_pick.col; ctx.font='bold 30px DM Mono'; ctx.textAlign='center';
+  ctx.fillText(now_pick.stageFull.toUpperCase(),W/2,y+40); y+=90;
+
+  // Time + duration
+  ctx.fillStyle='rgba(100,100,140,1)'; ctx.font='400 34px DM Mono'; ctx.textAlign='center';
+  ctx.fillText(`${fmtTime(now_pick.start)} → ${fmtTime(now_pick.end)}  ·  ${fmtDur(now_pick.durMin)}`,W/2,y); y+=60;
+
+  // Progress bar
+  if(now_pick.isNow){
+    const cfg=DAY_CONFIG[day];
+    const utc=Date.now()+new Date().getTimezoneOffset()*60000;
+    const lv=new Date(utc+-7*3600000);
+    let nowMin=lv.getHours()*60+lv.getMinutes(); if(nowMin<6*60)nowMin+=24*60;
+    const pct=Math.min(1,Math.max(0,(nowMin-now_pick.absStart)/now_pick.durMin));
+    const bw=W-160;
+    roundRect(ctx,80,y,bw,18,9); ctx.fillStyle='rgba(20,20,35,1)'; ctx.fill();
+    roundRect(ctx,80,y,Math.max(18,bw*pct),18,9); ctx.fillStyle=now_pick.col; ctx.fill();
+    y+=50;
+  }
+
+  // NEXT
+  if(next_pick){
+    y+=30;
+    const walk=getWalkTime(now_pick.stage,next_pick.stage);
+    ctx.fillStyle='rgba(20,20,32,1)'; ctx.fillRect(60,y,W-120,200);
+    roundRect(ctx,60,y,W-120,200,20); ctx.fillStyle='rgba(14,14,22,1)'; ctx.fill();
+    ctx.strokeStyle='rgba(28,28,44,1)'; ctx.lineWidth=1; ctx.stroke();
+
+    ctx.fillStyle='#ffd60a'; ctx.font='bold 28px DM Mono'; ctx.textAlign='left';
+    ctx.fillText('NEXT UP', 100,y+42);
+    if(walk>0){
+      ctx.fillStyle=walk>=10?'#ff8800':walk>=6?'#00d9ff':'#50c878';
+      ctx.textAlign='right'; ctx.fillText(`~${walk} MIN WALK`, W-100,y+42);
+    }
+    ctx.fillStyle='rgba(200,200,220,0.8)'; ctx.font='bold 52px Outfit'; ctx.textAlign='left';
+    ctx.fillText(next_pick.artist.slice(0,16)+(next_pick.artist.length>16?'…':''),100,y+110);
+    ctx.fillStyle=rgba(next_pick.col,0.8); ctx.font='bold 26px DM Mono';
+    ctx.fillText(`${next_pick.stageFull.toUpperCase()}  ·  ${fmtTime(next_pick.start)}`,100,y+154);
+    y+=220;
+  }
+
+  // Upcoming mini-list
+  y+=30;
+  const upcoming=picks.filter(p=>!p.isPast&&p!==now_pick&&p!==next_pick).slice(0,3);
+  if(upcoming.length){
+    ctx.fillStyle='rgba(30,30,50,1)'; ctx.font='bold 22px DM Mono'; ctx.textAlign='left';
+    ctx.fillText('ALSO TONIGHT', 80,y+28); y+=45;
+    upcoming.forEach(p=>{
+      ctx.fillStyle=rgba(p.col,0.8); ctx.font='400 28px DM Mono'; ctx.textAlign='left';
+      ctx.fillText(`${WP_TIER_ICONS[p.tier]}  ${fmtTime(p.start).padEnd(9)} ${p.artist.slice(0,16)}`,80,y+34);
+      y+=52;
+    });
+  }
+
+  // FW reminder
+  drawFwBar(ctx,W,H-300,80);
+  ctx.fillStyle='rgba(30,30,50,1)'; ctx.font='400 22px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY',W/2,H-40);
+  return H;
+}
+
+// ── STYLE 4: Neon Glow ──
+function drawStyle_neon(ctx, W, picks, day, logoImg) {
+  const H=1920;
+  // Deep dark bg
+  ctx.fillStyle='#050509'; ctx.fillRect(0,0,W,H);
+  // Vignette
+  const vig=ctx.createRadialGradient(W/2,H/2,100,W/2,H/2,Math.max(W,H)*0.8);
+  vig.addColorStop(0,'transparent'); vig.addColorStop(1,'rgba(0,0,0,0.6)');
+  ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+
+  // Bokeh
+  for(let i=0;i<60;i++){
+    const bx=Math.sin(i*137.5)*W/2+W/2; const by=(i*H/60+200)%H;
+    const br=Math.random()<0.3?3:1; const bc=Object.values(STAGE_COLS)[i%14];
+    ctx.fillStyle=rgba(bc,0.25+Math.random()*0.2);
+    ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill();
+  }
+
+  let y=60;
+  const lh=drawEdcLogo(ctx, logoImg, W/2, y, W-120, 140);
+  y+=lh+30;
+  ctx.fillStyle='rgba(40,40,70,1)'; ctx.font='400 26px DM Mono'; ctx.textAlign='center';
+  ctx.fillText(DAY_LABELS[day], W/2, y+30); y+=70;
+
+  const spacing=(H-y-200)/Math.max(picks.length,1);
+  picks.forEach((p,i)=>{
+    if(p.isPast){ y+=Math.min(spacing,130); return; }
+    const col=hexToRgb(p.col);
+    // Multi-layer text glow
+    for(let g2=8;g2>0;g2--){
+      ctx.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${g2*0.018})`;
+      ctx.font=`900 ${88+g2*2}px Outfit`; ctx.textAlign='center';
+      ctx.fillText(p.artist.split(' ')[0], W/2, y+90);
+    }
+    ctx.fillStyle=p.col; ctx.font='900 88px Outfit'; ctx.textAlign='center';
+    ctx.fillText(p.artist.length>14?p.artist.split(' ')[0]:p.artist, W/2, y+90);
+
+    ctx.fillStyle=rgba(p.col,0.7); ctx.font='bold 28px DM Mono';
+    ctx.fillText(`${WP_TIER_ICONS[p.tier]}  ${fmtTime(p.start)}  ·  ${p.stageFull.toUpperCase()}`, W/2, y+130);
+
+    // Glow line
+    const gl=ctx.createLinearGradient(60,0,W-60,0);
+    gl.addColorStop(0,'transparent'); gl.addColorStop(0.5,rgba(p.col,0.35)); gl.addColorStop(1,'transparent');
+    ctx.strokeStyle=gl; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(60,y+150); ctx.lineTo(W-60,y+150); ctx.stroke();
+    y+=Math.min(spacing,180);
+  });
+
+  drawFwBar(ctx,W,H-250,80);
+  ctx.fillStyle='rgba(28,28,48,1)'; ctx.font='400 22px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY',W/2,H-40);
+  return H;
+}
+
+// ── STYLE 5: Ticket Stubs ──
+function drawStyle_stubs(ctx, W, picks, day, logoImg) {
+  const STUB_H=190, PERF_H=40, PAD=40;
+  const totalH=80+(logoImg?130:0)+60+picks.length*(STUB_H+PERF_H)+120;
+  const H=Math.max(totalH,1920);
+  ctx.fillStyle='#060610'; ctx.fillRect(0,0,W,H);
+
+  let y=40;
+  const lh=drawEdcLogo(ctx, logoImg, W/2, y, W-120, 120);
+  y+=lh+20;
+  ctx.fillStyle='rgba(30,30,55,1)'; ctx.font='400 26px DM Mono'; ctx.textAlign='center';
+  ctx.fillText(DAY_LABELS[day], W/2, y+30); y+=60;
+
+  picks.forEach((p,i)=>{
+    const col=p.col; const [r,g,b]=hexToRgb(col);
+    const fade=p.isPast?0.25:1;
+
+    // Stub card
+    const sx=PAD, sy=y, sw=W-PAD*2, sh=STUB_H;
+    roundRect(ctx,sx,sy,sw,sh,16);
+    ctx.fillStyle=`rgba(${r},${g},${b},${p.isPast?0.04:0.1})`; ctx.fill();
+    ctx.strokeStyle=`rgba(${r},${g},${b},${p.isPast?0.1:0.3})`; ctx.lineWidth=1.5; ctx.stroke();
+
+    // Left accent strip
+    roundRect(ctx,sx,sy,22,sh,16); ctx.fillStyle=`rgba(${r},${g},${b},${p.isPast?0.3:0.8})`; ctx.fill();
+
+    // Perforation divider (vertical)
+    const perfX=sx+120;
+    ctx.strokeStyle=`rgba(${r},${g},${b},0.15)`; ctx.lineWidth=1; ctx.setLineDash([6,6]);
+    ctx.beginPath(); ctx.moveTo(perfX,sy+12); ctx.lineTo(perfX,sy+sh-12); ctx.stroke();
+    ctx.setLineDash([]);
+    // Perf holes
+    for(let py2=sy+18;py2<sy+sh-12;py2+=18){
+      ctx.fillStyle='#060610';
+      ctx.beginPath(); ctx.arc(perfX,py2,5,0,Math.PI*2); ctx.fill();
+    }
+
+    // Left block: time + tier
+    ctx.fillStyle=`rgba(${r},${g},${b},${fade*0.9})`; ctx.font='bold 32px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(fmtTime(p.start).replace(' ',''), sx+60, sy+62);
+    ctx.fillStyle=`rgba(${r},${g},${b},${fade*0.6})`; ctx.font='400 22px DM Mono';
+    ctx.fillText(fmtTime(p.end).replace(' ',''), sx+60, sy+96);
+    ctx.fillStyle=`rgba(${r},${g},${b},${fade})`;
+    ctx.font='bold 44px system-ui'; ctx.fillText(WP_TIER_ICONS[p.tier], sx+60, sy+152);
+
+    // Right block: artist + stage + duration
+    ctx.fillStyle=`rgba(220,220,240,${fade})`; ctx.font=`900 ${p.artist.length>12?44:52}px Outfit`; ctx.textAlign='left';
+    ctx.fillText(p.artist.slice(0,18)+(p.artist.length>18?'…':''), perfX+28, sy+72);
+
+    // Stage pill
+    const spw=ctx.measureText(p.stageFull).width+40;
+    roundRect(ctx,perfX+28,sy+88,spw,40,20);
+    ctx.fillStyle=`rgba(${r},${g},${b},${p.isPast?0.08:0.16})`; ctx.fill();
+    ctx.strokeStyle=`rgba(${r},${g},${b},${p.isPast?0.15:0.4})`; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle=`rgba(${r},${g},${b},${fade*0.9})`; ctx.font='bold 22px DM Mono'; ctx.textAlign='center';
+    ctx.fillText(p.stageFull.toUpperCase(),perfX+28+spw/2,sy+88+27);
+
+    // Duration
+    const durStr=p.tier==='part'&&p.inf?`◑ ${p.inf.stayMin}M`:fmtDur(p.durMin);
+    ctx.fillStyle=`rgba(80,80,110,${fade})`; ctx.font='400 22px DM Mono'; ctx.textAlign='left';
+    ctx.fillText(durStr, perfX+28, sy+148);
+
+    // Past stamp
+    if(p.isPast){
+      ctx.save(); ctx.translate(W-PAD-60,sy+STUB_H/2); ctx.rotate(-0.3);
+      ctx.strokeStyle='rgba(80,80,110,0.4)'; ctx.lineWidth=3;
+      roundRect(ctx,-52,-22,104,44,8); ctx.stroke();
+      ctx.fillStyle='rgba(80,80,110,0.4)'; ctx.font='bold 26px DM Mono'; ctx.textAlign='center';
+      ctx.fillText('DONE',0,14); ctx.restore();
+    }
+    if(p.isNow){
+      ctx.save(); ctx.translate(W-PAD-60,sy+STUB_H/2); ctx.rotate(-0.08);
+      roundRect(ctx,-52,-26,104,52,26); ctx.fillStyle='#ff1493'; ctx.fill();
+      ctx.fillStyle='#000'; ctx.font='bold 26px DM Mono'; ctx.textAlign='center';
+      ctx.fillText('▶ NOW',0,18); ctx.restore();
+    }
+
+    y+=STUB_H;
+
+    // Perforation between stubs
+    if(i<picks.length-1){
+      // Check for fireworks between these two sets
+      const FW_ABS=24*60+100;
+      if(p.absEnd<=FW_ABS && picks[i+1].absStart>=FW_ABS){
+        drawFwBar(ctx,W,y+6,PERF_H-4);
+      } else {
+        // Perf row
+        for(let px2=PAD+20;px2<W-PAD-20;px2+=20){
+          ctx.fillStyle='rgba(12,12,22,1)';
+          ctx.beginPath(); ctx.arc(px2,y+PERF_H/2,6,0,Math.PI*2); ctx.fill();
+        }
+        // Walk time
+        const walk=getWalkTime(p.stage,picks[i+1].stage);
+        if(walk>0){
+          const wc=walk>=10?'#ff8800':walk>=6?'#00d9ff':'#50c878';
+          ctx.fillStyle=wc; ctx.font='bold 22px DM Mono'; ctx.textAlign='center';
+          ctx.fillText(`~${walk} MIN`,W/2,y+PERF_H/2+8);
+        }
+      }
+      y+=PERF_H;
+    }
+  });
+
+  y+=30;
+  ctx.strokeStyle='rgba(22,22,38,1)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(80,y); ctx.lineTo(W-80,y); ctx.stroke();
+  ctx.fillStyle='rgba(28,28,48,1)'; ctx.font='400 22px DM Mono'; ctx.textAlign='center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY',W/2,y+36);
+  return y+60;
+}
+
+const STYLE_FNS = [
+  drawStyle_itinerary,
+  drawStyle_poster,
+  drawStyle_clock,
+  drawStyle_minimal,
+  drawStyle_neon,
+  drawStyle_stubs,
+  drawStyle_heatmap,
+  drawStyle_hourly,
+  drawStyle_filmstrip,
+];
+
+// ── STYLE 6: HEAT MAP ──
+function drawStyle_heatmap(ctx, W, picks, day, logoImg) {
+  const H = 1920;
+  canvasGradBg(ctx, W, H);
+  let y = 40;
+  const lh = drawEdcLogo(ctx, logoImg, W/2, y, W-120, 130);
+  y += lh + 20;
+  ctx.fillStyle = '#222235'; ctx.font = '400 26px DM Mono'; ctx.textAlign = 'center';
+  ctx.fillText(DAY_LABELS[day], W/2, y + 30); y += 60;
+
+  const cfg = DAY_CONFIG[day];
+  const STAGES_SHOWN = ['kinetic','circuit','neon-garden','basspod','quantum','wasteland'];
+  const TW = 100; // time col
+  const SW = (W - TW) / STAGES_SHOWN.length;
+  const GRID_H = H - y - 100;
+  const PPM = GRID_H / (cfg.endMin - cfg.startMin);
+
+  // Stage headers
+  ctx.fillStyle = '#0c0c18'; ctx.fillRect(0, y, W, 34);
+  ctx.fillStyle = '#0a0a14'; ctx.fillRect(0, y, TW, 34);
+  STAGES_SHOWN.forEach((s, i) => {
+    const col = STAGE_COLS[s] || '#888';
+    const sx = TW + i * SW;
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(sx, y); ctx.lineTo(sx, H-80); ctx.stroke();
+    ctx.strokeStyle = col; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(sx, y); ctx.lineTo(sx + SW, y); ctx.stroke();
+    ctx.fillStyle = rgba(col, 0.7); ctx.font = 'bold 18px DM Mono'; ctx.textAlign = 'center';
+    ctx.fillText((STAGE_NAMES_FULL[s] || s).toUpperCase().slice(0,8), sx + SW/2, y + 22);
+  });
+  y += 34;
+
+  // Hour grid lines
+  for (let h = cfg.startMin; h <= cfg.endMin; h += 60) {
+    const hy = y + (h - cfg.startMin) * PPM;
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(TW, hy); ctx.lineTo(W, hy); ctx.stroke();
+    const hAdj = Math.floor(h / 60) % 24;
+    const lbl = hAdj === 0 ? '12AM' : hAdj < 12 ? `${hAdj}AM` : hAdj === 12 ? '12PM' : `${hAdj-12}PM`;
+    ctx.fillStyle = 'rgba(60,60,90,1)'; ctx.font = '400 20px DM Mono'; ctx.textAlign = 'right';
+    ctx.fillText(lbl, TW - 8, hy + 7);
+  }
+
+  // All sets as faint background
+  (LINEUP[day] || []).forEach(s => {
+    if (!STAGES_SHOWN.includes(s.stage)) return;
+    const si = STAGES_SHOWN.indexOf(s.stage);
+    const col = STAGE_COLS[s.stage] || '#888';
+    const sx = TW + si * SW + 3;
+    const ts = parseTime(s.start, day); const te = parseTime(s.end, day);
+    if (ts === null || te === null) return;
+    const ty = y + ts * PPM; const bh = Math.max(4, (te - ts) * PPM);
+    roundRect(ctx, sx, ty, SW - 6, bh, 4);
+    ctx.fillStyle = rgba(col, 0.055); ctx.fill();
+  });
+
+  // YOUR picks glowing
+  picks.forEach(p => {
+    if (!STAGES_SHOWN.includes(p.stage)) return;
+    const si = STAGES_SHOWN.indexOf(p.stage);
+    const col = STAGE_COLS[p.stage] || '#888';
+    const sx = TW + si * SW + 3;
+    const ts = parseTime(p.start, day); const te = parseTime(p.end, day);
+    const ty = y + ts * PPM; const bh = Math.max(8, (te - ts) * PPM);
+    // Glow layers
+    for (let g = 8; g > 0; g--) {
+      roundRect(ctx, sx-g, ty-g, SW-6+g*2, bh+g*2, 8);
+      ctx.fillStyle = rgba(col, 0.02 * g); ctx.fill();
+    }
+    roundRect(ctx, sx, ty, SW-6, bh, 6);
+    ctx.fillStyle = rgba(col, 0.55); ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(sx, ty); ctx.lineTo(sx + SW-6, ty); ctx.stroke();
+    // Tier icon
+    if (bh > 40) {
+      ctx.fillStyle = rgba(col, 0.9); ctx.font = 'bold 28px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText(WP_TIER_ICONS[p.tier] || '', sx + (SW-6)/2, ty + bh/2 + 10);
+    }
+  });
+
+  // FW line
+  const fwOffset = (24*60+100) - cfg.startMin;
+  if (fwOffset > 0 && fwOffset < (cfg.endMin - cfg.startMin)) {
+    const fwy = y + fwOffset * PPM;
+    ctx.strokeStyle = 'rgba(255,215,0,0.7)'; ctx.lineWidth = 2; ctx.setLineDash([8,6]);
+    ctx.beginPath(); ctx.moveTo(TW, fwy); ctx.lineTo(W, fwy); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffd60a'; ctx.font = 'bold 22px DM Mono'; ctx.textAlign = 'left';
+    ctx.fillText('🎆 1:40AM', 8, fwy + 8);
+  }
+
+  ctx.fillStyle = '#1a1a28'; ctx.font = '400 22px DM Mono'; ctx.textAlign = 'center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY', W/2, H - 40);
+  return H;
+}
+
+// ── STYLE 7: HOUR BY HOUR ──
+function drawStyle_hourly(ctx, W, picks, day, logoImg) {
+  const cfg = DAY_CONFIG[day];
+  const HOURS = [];
+  for (let h = cfg.startMin; h < cfg.endMin; h += 60) HOURS.push(h);
+  const BLK = 160; const TW2 = 140;
+  const H = 100 + (HOURS.length * BLK) + 100;
+  canvasGradBg(ctx, W, H);
+  let y = 40;
+  const lh = drawEdcLogo(ctx, logoImg, W/2, y, W-120, 120);
+  y += lh + 20;
+  ctx.fillStyle = '#222235'; ctx.font = '400 26px DM Mono'; ctx.textAlign = 'center';
+  ctx.fillText(DAY_LABELS[day], W/2, y + 30); y += 60;
+
+  HOURS.forEach(hMin => {
+    const hAdj = Math.floor(hMin/60) % 24;
+    const lbl = hAdj === 0 ? '12AM' : hAdj < 12 ? `${hAdj}AM` : `${hAdj-12||12}${hAdj>=12?'PM':'AM'}`;
+    const active = picks.find(p => {
+      const ts = cfg.startMin + parseTime(p.start, day);
+      const te = cfg.startMin + parseTime(p.end, day);
+      return ts <= hMin && te > hMin;
+    });
+
+    if (active) {
+      const col = STAGE_COLS[active.stage] || '#888';
+      // Coloured band
+      for (let r = 0; r < BLK - 2; r++) {
+        const t = r / (BLK - 2);
+        const a = 0.22 * (1 - t * 0.4);
+        ctx.fillStyle = rgba(col, a);
+        ctx.fillRect(TW2, y + r, W - TW2 - 20, 1);
+      }
+      // Top line
+      ctx.strokeStyle = col; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(TW2, y); ctx.lineTo(W-20, y); ctx.stroke();
+      // Left accent
+      roundRect(ctx, TW2, y, 8, BLK - 2, 4);
+      ctx.fillStyle = rgba(col, 0.9); ctx.fill();
+      // Artist
+      ctx.fillStyle = '#eeeeff'; ctx.font = 'bold 44px Outfit'; ctx.textAlign = 'left';
+      ctx.fillText(active.artist.length > 14 ? active.artist.split(' ')[0] : active.artist, TW2 + 24, y + 58);
+      ctx.fillStyle = rgba(col, 0.75); ctx.font = 'bold 24px DM Mono';
+      ctx.fillText((STAGE_NAMES_FULL[active.stage] || active.stage).toUpperCase(), TW2 + 24, y + 90);
+      ctx.fillStyle = rgba(col, 0.5); ctx.font = '400 22px DM Mono';
+      ctx.fillText(`${fmtTime(active.start)} → ${fmtTime(active.end)}`, TW2 + 24, y + 118);
+      // Tier
+      const tc = hexToRgb(TIER_COLS[active.tier] || '#888');
+      ctx.fillStyle = `rgba(${tc[0]},${tc[1]},${tc[2]},0.9)`;
+      ctx.font = 'bold 36px system-ui'; ctx.textAlign = 'right';
+      ctx.fillText(WP_TIER_ICONS[active.tier] || '', W - 40, y + 60);
+      if (active.isNow) {
+        roundRect(ctx, W-160, y+10, 120, 44, 22);
+        ctx.fillStyle = '#ff1493'; ctx.fill();
+        ctx.fillStyle = '#000'; ctx.font = 'bold 22px DM Mono'; ctx.textAlign = 'center';
+        ctx.fillText('▶ NOW', W-100, y+38);
+      }
+    } else {
+      ctx.strokeStyle = 'rgba(20,20,35,1)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(TW2, y); ctx.lineTo(W-20, y); ctx.stroke();
+      ctx.fillStyle = 'rgba(30,30,50,1)'; ctx.font = '400 26px DM Mono'; ctx.textAlign = 'left';
+      ctx.fillText('—', TW2 + 24, y + BLK/2 + 10);
+    }
+
+    // FW at 1:40AM
+    if (hMin <= 24*60+100 && hMin + 60 > 24*60+100) {
+      const fwY = y + (40/60) * BLK;
+      ctx.strokeStyle = rgba('#ffd60a', 0.6); ctx.lineWidth = 1.5; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(TW2, fwY); ctx.lineTo(W-20, fwY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#ffd60a'; ctx.font = 'bold 22px DM Mono'; ctx.textAlign = 'left';
+      ctx.fillText('🎆 1:40AM FIREWORKS', TW2 + 14, fwY - 4);
+    }
+
+    // Time label
+    ctx.fillStyle = 'rgba(60,60,95,1)'; ctx.font = 'bold 28px DM Mono'; ctx.textAlign = 'right';
+    ctx.fillText(lbl, TW2 - 16, y + BLK/2 + 10);
+    y += BLK;
+  });
+
+  ctx.strokeStyle = 'rgba(22,22,38,1)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(80, y+10); ctx.lineTo(W-80, y+10); ctx.stroke();
+  ctx.fillStyle = '#222235'; ctx.font = '400 22px DM Mono'; ctx.textAlign = 'center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY', W/2, y+36);
+  return y + 60;
+}
+
+// ── STYLE 8: FILM STRIP ──
+function drawStyle_filmstrip(ctx, W, picks, day, logoImg) {
+  const FH = 240; const FG = 16; const SX = 50; const FW = W - 100;
+  const H = Math.max(1920, 160 + picks.length * (FH + FG) + 100);
+  canvasGradBg(ctx, W, H);
+  let y = 40;
+  const lh = drawEdcLogo(ctx, logoImg, W/2, y, W-120, 120);
+  y += lh + 20;
+  ctx.fillStyle = '#222235'; ctx.font = '400 26px DM Mono'; ctx.textAlign = 'center';
+  ctx.fillText(DAY_LABELS[day], W/2, y + 30); y += 60;
+
+  picks.forEach((p, i) => {
+    const col = STAGE_COLS[p.stage] || '#888';
+    const [r,g,b] = hexToRgb(col);
+    const fade = p.isPast ? 0.3 : 1.0;
+    const tc = hexToRgb(TIER_COLS[p.tier] || '#888');
+
+    // Frame bg
+    roundRect(ctx, SX, y, FW, FH, 16);
+    ctx.fillStyle = `rgba(${r},${g},${b},${p.isPast ? 0.05 : 0.1})`; ctx.fill();
+    ctx.strokeStyle = `rgba(${r},${g},${b},${0.45 * fade})`; ctx.lineWidth = 2;
+    roundRect(ctx, SX, y, FW, FH, 16); ctx.stroke();
+
+    // Glow if now
+    if (p.isNow) {
+      for (let gw = 5; gw > 0; gw--) {
+        roundRect(ctx, SX-gw, y-gw, FW+gw*2, FH+gw*2, 18);
+        ctx.strokeStyle = `rgba(${r},${g},${b},${0.1*gw})`; ctx.lineWidth = 1; ctx.stroke();
+      }
+    }
+
+    // Sprocket holes
+    [SX + 12, SX + FW - 22].forEach(hx => {
+      roundRect(ctx, hx, y + 16, 12, FH - 32, 6);
+      ctx.fillStyle = 'rgba(4,4,10,1)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(22,22,38,1)'; ctx.lineWidth = 1; ctx.stroke();
+    });
+
+    // Frame number
+    ctx.fillStyle = `rgba(${r},${g},${b},${0.4*fade})`;
+    ctx.font = 'bold 22px DM Mono'; ctx.textAlign = 'left';
+    ctx.fillText(`${String(i+1).padStart(2,'0')}`, SX + 36, y + 30);
+
+    // Artist name
+    ctx.fillStyle = `rgba(235,235,248,${fade})`;
+    ctx.font = `bold ${p.artist.length > 14 ? 48 : 58}px Outfit`;
+    ctx.textAlign = 'left';
+    ctx.fillText(p.artist.slice(0, 18) + (p.artist.length > 18 ? '…' : ''), SX + 36, y + 110);
+
+    // Stage + time
+    ctx.fillStyle = `rgba(${r},${g},${b},${0.8*fade})`;
+    ctx.font = 'bold 26px DM Mono'; ctx.textAlign = 'left';
+    ctx.fillText(`${(STAGE_NAMES_FULL[p.stage]||p.stage).toUpperCase().slice(0,12)}`, SX + 36, y + 148);
+    ctx.fillStyle = `rgba(${r},${g},${b},${0.55*fade})`;
+    ctx.font = '400 24px DM Mono';
+    ctx.fillText(`${fmtTime(p.start)} → ${fmtTime(p.end)}  ·  ${fmtDur(p.durMin)}`, SX + 36, y + 178);
+
+    // Tier pill
+    roundRect(ctx, SX + 36, y + FH - 52, 140, 38, 19);
+    ctx.fillStyle = `rgba(${tc[0]},${tc[1]},${tc[2]},${0.15*fade})`; ctx.fill();
+    ctx.strokeStyle = `rgba(${tc[0]},${tc[1]},${tc[2]},${0.4*fade})`; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = `rgba(${tc[0]},${tc[1]},${tc[2]},${fade})`;
+    ctx.font = 'bold 22px DM Mono'; ctx.textAlign = 'center';
+    ctx.fillText(`${WP_TIER_ICONS[p.tier]} ${p.tier.toUpperCase()}`, SX + 36 + 70, y + FH - 28);
+
+    // NOW badge
+    if (p.isNow) {
+      roundRect(ctx, SX + FW - 150, y + 12, 110, 42, 21);
+      ctx.fillStyle = '#ff1493'; ctx.fill();
+      ctx.fillStyle = '#000'; ctx.font = 'bold 24px DM Mono'; ctx.textAlign = 'center';
+      ctx.fillText('▶ NOW', SX + FW - 95, y + 38);
+    }
+    if (p.isPast) {
+      ctx.fillStyle = 'rgba(40,40,58,0.9)'; ctx.font = 'bold 22px DM Mono'; ctx.textAlign = 'right';
+      ctx.fillText('SEEN', SX + FW - 20, y + 30);
+    }
+
+    y += FH;
+
+    if (i < picks.length - 1) {
+      // FW between sets?
+      const FW_ABS = 24*60+100;
+      const cfg = DAY_CONFIG[day];
+      const thisEnd = cfg.startMin + parseTime(p.end, day);
+      const nextStart = cfg.startMin + parseTime(picks[i+1].start, day);
+      if (thisEnd <= FW_ABS && nextStart >= FW_ABS) {
+        drawFwBar(ctx, W, y + 4, FG + 40);
+        y += FG + 44;
+      } else {
+        // Walk time gap
+        const w = getWalkTime(p.stage, picks[i+1].stage);
+        const wc = w >= 10 ? '#ff8800' : w >= 6 ? '#00d9ff' : '#50c878';
+        ctx.fillStyle = wc; ctx.font = 'bold 22px DM Mono'; ctx.textAlign = 'center';
+        ctx.fillText(`~${w} MIN WALK`, W/2, y + FG/2 + 8);
+        y += FG;
+      }
+    }
+  });
+
+  y += 20;
+  ctx.strokeStyle = 'rgba(22,22,38,1)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(80, y); ctx.lineTo(W-80, y); ctx.stroke();
+  ctx.fillStyle = '#222235'; ctx.font = '400 22px DM Mono'; ctx.textAlign = 'center';
+  ctx.fillText('EDC LAS VEGAS 2026  ·  UNDER THE ELECTRIC SKY', W/2, y + 36);
+  return y + 60;
+}
+
+// Canvas fonts — loaded via Google Fonts in <head>, canvas picks them up after document.fonts.ready
+
+function exportWallpaper(styleIdx) {
+  const idx = styleIdx ?? _wallpaperStyle ?? 0;
+  const day = currentDay;
+  const picks = getPicks(day);
+  if (!picks.length) { showToast('No picks for this day'); return; }
+
+  const CW = 1080;
+  const bigCanvas = document.createElement('canvas');
+  bigCanvas.width = CW; bigCanvas.height = 4000;
+  const ctx = bigCanvas.getContext('2d');
+
+  showToast('Export starting...');
+
+  showToast('Export starting...');
+  document.fonts.ready.then(() => {
+    showToast('Fonts ready, rendering...');
+    try {
+      const fn = STYLE_FNS[idx] || STYLE_FNS[0];
+      showToast('Drawing style ' + idx + '...');
+      const finalH = fn(ctx, CW, picks, day, null);
+      showToast('Draw done h=' + finalH + ', making canvas...');
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = CW;
+      finalCanvas.height = Math.min(Math.max(finalH, 1920), 4000);
+      const fctx = finalCanvas.getContext('2d');
+      fctx.drawImage(bigCanvas, 0, 0);
+      showToast('Canvas ready, converting to blob...');
+      finalCanvas.toBlob(blob => {
+        if (!blob) { showToast('toBlob returned null!'); return; }
+        showToast('Blob ok, showing preview...');
+        const url = URL.createObjectURL(blob);
+        showWallpaperPreview(url, `edc2026-day${day}-style${idx}.png`);
+      }, 'image/png');
+    } catch(e) {
+      showToast('ERROR: ' + e.message);
+      console.error(e);
+    }
+  });
+}
+
+
+function selectWallpaperStyle(idx, btn) {
+  _wallpaperStyle = idx;
+  document.querySelectorAll('.ws-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+
+
+function showWallpaperPreview(url, filename) {
+  _wallpaperURL = url;
+  _wallpaperFilename = filename;
+  document.getElementById('wallpaperPreviewImg').src = url;
+  document.getElementById('wallpaperOverlay').classList.add('show');
+}
+
+document.getElementById('wallpaperClose').addEventListener('click', closeWallpaperPreview);
+document.getElementById('wallpaperCancel').addEventListener('click', closeWallpaperPreview);
+document.getElementById('wallpaperSave').addEventListener('click', () => {
+  if (!_wallpaperURL) return;
+  const a = document.createElement('a');
+  a.href = _wallpaperURL;
+  a.download = _wallpaperFilename;
+  a.click();
+  closeWallpaperPreview();
+  showToast('Schedule wallpaper saved!');
+});
+document.getElementById('wallpaperOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('wallpaperOverlay')) closeWallpaperPreview();
+});
+
+function closeWallpaperPreview() {
+  document.getElementById('wallpaperOverlay').classList.remove('show');
+  if (_wallpaperURL) URL.revokeObjectURL(_wallpaperURL);
+  _wallpaperURL = null;
+}
+
+// ============================================
+// ============================================
+// CUSTOM MARKERS
+// ============================================
+const MARKER_COLORS = ['#ff1493','#00d9ff','#ffd60a','#39ff14','#ff8800','#b026ff','#ffffff'];
+let markers = {}; // { day: [ {id, min, label, color} ] }
+let _markerEditId = null;
+let _markerPendingMin = null;
+let _markerPendingDay = null;
+let _markerSelectedColor = MARKER_COLORS[0];
+
+try { markers = JSON.parse(localStorage.getItem('edc2026-markers') || '{}'); } catch(e) {}
+
+function saveMarkers() {
+  try { localStorage.setItem('edc2026-markers', JSON.stringify(markers)); } catch(e) {}
+}
+
+function minToTimeStr(min) {
+  let h = Math.floor(min / 60) % 24;
+  const m = min % 60;
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${String(m).padStart(2,'0')} ${ap}`;
+}
+
+let _swatchesBuilt = false;
+function initMarkerSwatches() {
+  if (_swatchesBuilt) return;
+  const colorRow = document.getElementById('markerColorRow');
+  if (!colorRow) return;
+  MARKER_COLORS.forEach(col => {
+    const sw = document.createElement('div');
+    sw.className = 'marker-color-swatch' + (col === _markerSelectedColor ? ' active' : '');
+    sw.style.background = col;
+    sw.style.boxShadow = `0 0 8px ${col}66`;
+    sw.addEventListener('click', () => {
+      _markerSelectedColor = col;
+      colorRow.querySelectorAll('.marker-color-swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+    });
+    colorRow.appendChild(sw);
+  });
+  _swatchesBuilt = true;
+}
+
+function openMarkerModal(min, day, existingId = null) {
+  _markerPendingMin = min;
+  _markerPendingDay = day;
+  _markerEditId = existingId;
+
+  initMarkerSwatches(); // safe to call multiple times (idempotent after first)
+
+  document.getElementById('markerModalTime').textContent = minToTimeStr(min);
+  const existing = existingId && (markers[day] || []).find(m => m.id === existingId);
+  document.getElementById('markerLabelInput').value = existing ? existing.label : '';
+  document.getElementById('markerDeleteBtn').style.display = existingId ? 'block' : 'none';
+
+  const colorRow = document.getElementById('markerColorRow');
+  if (existing) {
+    _markerSelectedColor = existing.color;
+    colorRow.querySelectorAll('.marker-color-swatch').forEach(sw => {
+      sw.classList.toggle('active', sw.style.background === existing.color);
+    });
+  } else {
+    _markerSelectedColor = MARKER_COLORS[0];
+    colorRow.querySelectorAll('.marker-color-swatch').forEach((sw, i) => {
+      sw.classList.toggle('active', i === 0);
+    });
+  }
+
+  document.getElementById('markerModalBackdrop').classList.add('show');
+  setTimeout(() => document.getElementById('markerLabelInput').focus(), 150);
+}
+
+function closeMarkerModal() {
+  document.getElementById('markerModalBackdrop').classList.remove('show');
+  _markerPendingMin = null; _markerPendingDay = null; _markerEditId = null;
+}
+
+document.getElementById('markerTimeMinus').addEventListener('click', () => {
+  _markerPendingMin = Math.max(DAY_CONFIG[_markerPendingDay]?.startMin || 0, _markerPendingMin - 5);
+  document.getElementById('markerModalTime').textContent = minToTimeStr(_markerPendingMin);
+});
+document.getElementById('markerTimePlus').addEventListener('click', () => {
+  _markerPendingMin = Math.min(DAY_CONFIG[_markerPendingDay]?.endMin || 9999, _markerPendingMin + 5);
+  document.getElementById('markerModalTime').textContent = minToTimeStr(_markerPendingMin);
+});
+
+document.getElementById('markerSaveBtn').addEventListener('click', () => {
+  const label = document.getElementById('markerLabelInput').value.trim().toUpperCase();
+  if (!label) return;
+  const day = _markerPendingDay;
+  if (!markers[day]) markers[day] = [];
+  if (_markerEditId) {
+    const m = markers[day].find(m => m.id === _markerEditId);
+    if (m) { m.label = label; m.color = _markerSelectedColor; }
+  } else {
+    markers[day].push({ id: Date.now().toString(), min: _markerPendingMin, label, color: _markerSelectedColor });
+  }
+  saveMarkers();
+  closeMarkerModal();
+  renderCustomMarkers(day);
+});
+
+document.getElementById('markerDeleteBtn').addEventListener('click', () => {
+  const day = _markerPendingDay;
+  markers[day] = (markers[day] || []).filter(m => m.id !== _markerEditId);
+  saveMarkers();
+  closeMarkerModal();
+  renderCustomMarkers(day);
+});
+
+document.getElementById('markerCancelBtn').addEventListener('click', closeMarkerModal);
+document.getElementById('markerModalClose').addEventListener('click', closeMarkerModal);
+document.getElementById('markerModalBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('markerModalBackdrop')) closeMarkerModal();
+});
+
+function renderCustomMarkers(day) {
+  document.querySelectorAll('.custom-marker-line, .custom-marker-pill').forEach(el => el.remove());
+  const cfg = DAY_CONFIG[day];
+  const ppm = fontPxPerMin ? fontPxPerMin[fontIdx] || cfg.pxPerMin : cfg.pxPerMin;
+  const dayMarkers = markers[day] || [];
+
+  dayMarkers.forEach(m => {
+    const offsetMin = m.min - cfg.startMin;
+    if (offsetMin < 0) return;
+    const py = offsetMin * ppm;
+    const col = m.color || '#ff1493';
+
+    // Dashed line across stage cols
+    document.querySelectorAll('.stage-col').forEach(stageCol => {
+      const line = document.createElement('div');
+      line.className = 'custom-marker-line';
+      line.style.top = py + 'px';
+      line.style.borderColor = col;
+      line.style.opacity = '0.6';
+      stageCol.appendChild(line);
+    });
+
+    // Pill on time column
+    const timeCol = document.querySelector('.time-col');
+    if (timeCol) {
+      const pill = document.createElement('div');
+      pill.className = 'custom-marker-pill';
+      pill.style.top = (py - 9) + 'px';
+      pill.style.background = `${col}22`;
+      pill.style.borderColor = `${col}88`;
+      pill.style.color = col;
+      pill.innerHTML = `📍 ${m.label.slice(0,12)}`;
+      pill.addEventListener('click', () => openMarkerModal(m.min, day, m.id));
+      timeCol.appendChild(pill);
+    }
+  });
+}
+
+// Long-press on time column to add marker
+function attachTimeColLongPress() {
+  const timeCol = document.querySelector('.time-col');
+  if (!timeCol) return;
+  let lpt = null;
+  let startY = 0;
+
+  timeCol.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    startY = touch.clientY;
+    lpt = setTimeout(() => {
+      // Calculate time from touch position
+      const rect = timeCol.getBoundingClientRect();
+      const relY = touch.clientY - rect.top + timeCol.scrollTop;
+      // Get ppm from current grid state
+      const cfg = DAY_CONFIG[currentDay];
+      const ppm = fontPxPerMin ? fontPxPerMin[fontIdx] || cfg.pxPerMin : cfg.pxPerMin;
+      const offsetMin = Math.round(relY / ppm / 5) * 5; // snap to 5 min
+      const absMin = cfg.startMin + offsetMin;
+      if (absMin >= cfg.startMin && absMin <= cfg.endMin) {
+        navigator.vibrate && navigator.vibrate(40);
+        openMarkerModal(absMin, currentDay);
+      }
+    }, 500);
+  }, { passive: true });
+
+  timeCol.addEventListener('touchmove', e => {
+    if (Math.abs(e.touches[0].clientY - startY) > 8) {
+      clearTimeout(lpt); lpt = null;
+    }
+  }, { passive: true });
+
+  timeCol.addEventListener('touchend', () => { clearTimeout(lpt); lpt = null; });
+}
+
+// ============================================
+// NOW LINE
+// ============================================
+let nowLineInterval = null;
+
+function getNowOffsetPx(day) {
+  const cfg = DAY_CONFIG[day];
+  const now = new Date();
+  // Convert Las Vegas time (UTC-7 during May)
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const lv = new Date(utc + -7 * 3600000);
+  let nowMin = lv.getHours() * 60 + lv.getMinutes();
+  // Treat 0–5:30 as next-day (past midnight)
+  if (nowMin < 6 * 60) nowMin += 24 * 60;
+  const offsetMin = nowMin - cfg.startMin;
+  const totalMin = cfg.endMin - cfg.startMin;
+  if (offsetMin < 0 || offsetMin > totalMin) return null;
+  return offsetMin * cfg.pxPerMin;
+}
+
+function formatNowLabel() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const lv = new Date(utc + -7 * 3600000);
+  let h = lv.getHours(), m = lv.getMinutes();
+  const ampm = h >= 12 ? 'AM' : 'AM';
+  const disp = h % 12 || 12;
+  return `${disp}:${String(m).padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'} NOW`;
+}
+
+function renderNowLine(day) {
+  document.querySelectorAll('.now-line, .now-label, .fireworks-canvas, .fireworks-label, .custom-marker-line, .custom-marker-pill').forEach(el => el.remove());
+  const px = getNowOffsetPx(day);
+  if (px === null) return;
+
+  // Add to time column
+  const timeCol = document.querySelector('.time-col');
+  if (timeCol) {
+    const label = document.createElement('div');
+    label.className = 'now-label';
+    label.style.top = (px + 11) + 'px';
+    label.textContent = formatNowLabel();
+    timeCol.appendChild(label);
+  }
+
+  // Add to each stage column
+  document.querySelectorAll('.stage-col').forEach(col => {
+    const line = document.createElement('div');
+    line.className = 'now-line';
+    line.style.top = px + 'px';
+    col.appendChild(line);
+  });
+}
+
+function startNowLine(day) {
+  if (nowLineInterval) clearInterval(nowLineInterval);
+  renderNowLine(day);
+  renderFireworksLine(day);
+  renderCustomMarkers(day);
+  nowLineInterval = setInterval(() => renderNowLine(day), 60000);
+  // Re-attach long press since time col is re-created
+  setTimeout(attachTimeColLongPress, 100);
+}
+
+// FIREWORKS LINE — 1:40AM glowing line
+function renderFireworksLine(day) {
+  document.querySelectorAll('.fireworks-canvas, .fireworks-label').forEach(el => el.remove());
+  const cfg = DAY_CONFIG[day];
+  const fwMin = (24 + 1) * 60 + 40;
+  const offsetMin = fwMin - cfg.startMin;
+  if (offsetMin < 0 || offsetMin > (cfg.endMin - cfg.startMin)) return;
+  const ppm = fontPxPerMin ? fontPxPerMin[fontIdx] || cfg.pxPerMin : cfg.pxPerMin;
+  const py = offsetMin * ppm;
+  const DPR = window.devicePixelRatio || 1;
+
+  const RAINBOW = ['#ff2a6d','#ff8800','#ffd60a','#39ff14','#00d9ff','#b026ff'];
+
+  function makeCanvas(w, h) {
+    const c = document.createElement('canvas');
+    c.className = 'fireworks-canvas';
+    c.width = Math.round(w * DPR);
+    c.height = Math.round(h * DPR);
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    const ctx = c.getContext('2d');
+    ctx.scale(DPR, DPR);
+    return { c, ctx };
+  }
+
+  const H = 20; // canvas height (glow spreads ±10px)
+
+  // Stage columns — rainbow glowing line
+  const stageCols = document.querySelectorAll('.stage-col');
+  stageCols.forEach((col, i) => {
+    const cw = col.offsetWidth || 80;
+    const { c, ctx } = makeCanvas(cw, H);
+    c.style.top = (py - H/2) + 'px';
+
+    const col1 = RAINBOW[i % RAINBOW.length];
+    const col2 = RAINBOW[(i+1) % RAINBOW.length];
+
+    // Outer glow
+    for (let g = 6; g >= 1; g--) {
+      const grad = ctx.createLinearGradient(0, 0, cw, 0);
+      grad.addColorStop(0, col1 + Math.floor(g*6).toString(16).padStart(2,'0'));
+      grad.addColorStop(1, col2 + Math.floor(g*6).toString(16).padStart(2,'0'));
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = g * 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, H/2);
+      ctx.lineTo(cw, H/2);
+      ctx.stroke();
+    }
+
+    // Bright core line
+    const coreGrad = ctx.createLinearGradient(0, 0, cw, 0);
+    coreGrad.addColorStop(0, col1);
+    coreGrad.addColorStop(1, col2);
+    ctx.strokeStyle = coreGrad;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, H/2);
+    ctx.lineTo(cw, H/2);
+    ctx.stroke();
+
+    col.appendChild(c);
+  });
+
+  // Time column — emoji + label
+  const timeCol = document.querySelector('.time-col');
+  if (timeCol) {
+    const tcW = timeCol.offsetWidth || 40;
+    const { c, ctx } = makeCanvas(tcW, H);
+    c.style.top = (py - H/2) + 'px';
+
+    // Gold glow on time col
+    for (let g = 5; g >= 1; g--) {
+      ctx.strokeStyle = `rgba(255,215,0,${g*0.04})`;
+      ctx.lineWidth = g * 3;
+      ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(tcW, H/2); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(255,215,0,0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(tcW, H/2); ctx.stroke();
+
+    timeCol.appendChild(c);
+
+    // Label below line
+    const label = document.createElement('div');
+    label.className = 'fireworks-label';
+    label.style.top = (py + H/2 + 2) + 'px';
+    label.style.left = '0';
+    label.style.right = '0';
+    label.style.position = 'absolute';
+    label.style.textAlign = 'center';
+    label.style.fontSize = '11px';
+    label.style.lineHeight = '1';
+    label.style.pointerEvents = 'none';
+    label.textContent = '🎆';
+    timeCol.appendChild(label);
+  }
+}
+// ============================================
+// TRAVEL / ROUTE PANEL
+// ============================================
+['routeBtn','fabRouteBtn'].forEach(id => { const el4 = document.getElementById(id); if(el4) el4.addEventListener('click', () => {
+  buildRoutePanel();
+  document.getElementById('travelOverlay').classList.add('show');
+  document.getElementById('routeBtn').classList.add('active');
+}); });
+document.getElementById('travelOverlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('travelOverlay')) {
+    document.getElementById('travelOverlay').classList.remove('show');
+    document.getElementById('routeBtn').classList.remove('active');
+  }
+});
+
+function buildRoutePanel() {
+  const data = LINEUP[currentDay] || [];
+  const picks = data
+    .filter(s => {
+      const t = getTier(currentDay, setKey(s));
+      return t === 'must' || t === 'want' || t === 'part';
+    })
+    .map(s => ({ ...s, startMinAbs: parseTime(s.start, currentDay) + DAY_CONFIG[currentDay].startMin }))
+    .sort((a, b) => a.startMinAbs - b.startMinAbs);
+
+  const content = document.getElementById('travelContent');
+  document.getElementById('travelSub').textContent =
+    `Day ${currentDay} · ${picks.length} pick${picks.length !== 1 ? 's' : ''} in time order`;
+
+  if (!picks.length) {
+    content.innerHTML = `<div class="travel-empty">No must/want picks yet.<br>Tap sets to add them.</div>`;
+    return;
+  }
+
+  let html = '';
+  picks.forEach((s, i) => {
+    const stage = STAGES.find(st => st.id === s.stage);
+    const tier = getTier(currentDay, setKey(s));
+    const tierIcon = tier === 'must' ? '♥' : tier === 'part' ? '◑' : '★';
+    html += `
+      <div class="travel-item">
+        <div class="travel-dot" style="background:${stage?.color || '#fff'}"></div>
+        <div class="travel-info">
+          <div class="travel-artist">${tierIcon} ${s.artist}</div>
+          <div class="travel-meta">${stage?.name || s.stage} · ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+        </div>
+      </div>`;
+
+    if (i < picks.length - 1) {
+      const next = picks[i + 1];
+      const walkMins = getWalkMins(s.stage, next.stage);
+      const gap = next.startMinAbs - s.startMinAbs - (parseTime(s.end, currentDay) - parseTime(s.start, currentDay));
+      const isSameStage = s.stage === next.stage;
+
+      if (isSameStage) {
+        html += `<div class="travel-walk">↕ Same stage</div>`;
+      } else {
+        const cls = gap < walkMins ? 'conflict' : gap < walkMins + 5 ? 'tight' : '';
+        const icon = gap < walkMins ? '⚠️' : '🚶';
+        const note = gap < walkMins
+          ? `only ${gap} min gap — might miss start`
+          : gap < walkMins + 5 ? 'tight — head over early' : '';
+        html += `<div class="travel-walk ${cls}">${icon} ~${walkMins} min walk${note ? ` · ${note}` : ''}</div>`;
+      }
+    }
+  });
+
+  content.innerHTML = html;
+}
+
+// ============================================
+// SERVICE WORKER REGISTRATION
+// ============================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ============================================
+// PWA INSTALL PROMPT
+// ============================================
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  const { outcome } = await deferredInstall.userChoice;
+  deferredInstall = null;
+  document.getElementById('installBanner').classList.remove('show');
+});
+document.getElementById('installDismiss').addEventListener('click', () => {
+  document.getElementById('installBanner').classList.remove('show');
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('show');
+  showToast('App installed! Open from your home screen 🎉');
+});
+
+// ============================================
+// TOAST
+// ============================================
+let toastTimer = null;
+function showToast(msg, duration = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ============================================
+// FONT SIZE
+// ============================================
+const fontSizes   = ['', 'font-large', 'font-xlarge'];
+const fontPxPerMin = [1.6, 1.9, 2.2];
+const fontColWidth = [132, 152, 172];
+let fontIdx = 0;
+
+function setFontSize(idx) {
+  fontSizes.forEach(c => { if (c) document.body.classList.remove(c); });
+  if (fontSizes[idx]) document.body.classList.add(fontSizes[idx]);
+  fontIdx = idx;
+  // Update column width CSS variable
+  document.documentElement.style.setProperty('--col-width', fontColWidth[idx] + 'px');
+  document.querySelectorAll('.font-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  try { localStorage.setItem('edc2026-font', idx); } catch(e) {}
+  // Re-render grid so tile heights and widths update
+  renderGrid(currentDay);
+  updateUI();
+  applyFriendOverlay();
+  startNowLine(currentDay);
+}
+document.getElementById('fontNorm').addEventListener('click', () => setFontSize(0));
+document.getElementById('fontLg').addEventListener('click', () => setFontSize(1));
+document.getElementById('fontXl').addEventListener('click', () => setFontSize(2));
+try { const saved = localStorage.getItem('edc2026-font'); if (saved) setFontSize(parseInt(saved)); } catch(e) {}
+
+// ============================================
+// REMINDERS
+// ============================================
+let reminders = {};
+try { reminders = JSON.parse(localStorage.getItem('edc2026-reminders') || '{}'); } catch(e) {}
+
+function saveReminders() {
+  try { localStorage.setItem('edc2026-reminders', JSON.stringify(reminders)); } catch(e) {}
+}
+
+async function toggleReminder(key, set, day) {
+  if (reminders[key]) {
+    delete reminders[key];
+    saveReminders();
+    updateReminderIcons();
+    showToast('Reminder removed');
+    return;
+  }
+  if (Notification.permission === 'default') {
+    const p = await Notification.requestPermission();
+    if (p !== 'granted') { showToast('Enable notifications to use reminders'); return; }
+  }
+  if (Notification.permission === 'denied') { showToast('Notifications blocked — check browser settings'); return; }
+
+  const REMIND_MINS = 15;
+  const cfg = DAY_CONFIG[day];
+  const startOffsetMin = parseTime(set.start, day);
+  const startAbsMin = cfg.startMin + startOffsetMin;
+
+  // Build a Date for the set start in LA time (UTC-7 in May)
+  const dayDates = { 1: '2026-05-15', 2: '2026-05-16', 3: '2026-05-17' };
+  // If set is AM (past midnight), date is next day
+  const m = set.start.match(/^(\d{1,2}):(\d{2})(am|pm)$/i);
+  let h = parseInt(m[1]);
+  const ampm = m[3].toLowerCase();
+  if (ampm === 'pm' && h !== 12) h += 12;
+  if (ampm === 'am' && h === 12) h = 0;
+  const isNextDay = ampm === 'am' && h < 12;
+
+  const baseDateStr = dayDates[day];
+  const baseDateParts = baseDateStr.split('-').map(Number);
+  const setDate = new Date(Date.UTC(baseDateParts[0], baseDateParts[1]-1, baseDateParts[2] + (isNextDay ? 1 : 0), h + 7, parseInt(m[2])));
+  const remindAt = new Date(setDate.getTime() - REMIND_MINS * 60000);
+  const msUntil = remindAt.getTime() - Date.now();
+
+  if (msUntil < 0) { showToast('That set has already started!'); return; }
+
+  reminders[key] = { set: set.artist, stage: set.stage, time: remindAt.getTime(), day };
+  saveReminders();
+  scheduleReminder(key, msUntil, set, day);
+  updateReminderIcons();
+  showToast(`🔔 Reminder set for 15 min before ${set.artist}`);
+}
+
+function scheduleReminder(key, msUntil, set, day) {
+  const stage = STAGES.find(s => s.id === set.stage)?.name || set.stage;
+  setTimeout(() => {
+    if (!reminders[key]) return;
+    new Notification(`⏰ Starting soon at EDC`, {
+      body: `${set.artist} @ ${stage} in 15 minutes`,
+      icon: './icon.png',
+      badge: './icon.png',
+      tag: key,
+    });
+  }, msUntil);
+}
+
+function scheduleAllReminders() {
+  Object.entries(reminders).forEach(([key, r]) => {
+    const msUntil = r.time - Date.now();
+    if (msUntil > 0) {
+      const data = LINEUP[r.day] || [];
+      const set = data.find(s => setKey(s) === key);
+      if (set) scheduleReminder(key, msUntil, set, r.day);
+    } else {
+      delete reminders[key];
+    }
+  });
+  saveReminders();
+}
+
+function updateReminderIcons() {
+  document.querySelectorAll('[data-reminder-key]').forEach(btn => {
+    const active = !!reminders[btn.dataset.reminderKey];
+    btn.classList.toggle('active', active);
+    btn.textContent = active ? '🔔' : '🔕';
+  });
+}
+
+// ============================================
+// LIST VIEW
+// ============================================
+['hourlyBtn','fabHourlyBtn'].forEach(id => { const el3 = document.getElementById(id); if(el3) el3.addEventListener('click', () => {
+  buildHourlyPanel();
+  document.getElementById('hourlyOverlay').classList.add('show');
+  document.getElementById('hourlyBtn').classList.add('active');
+}); });
+document.getElementById('hourlyOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('hourlyOverlay')) {
+    document.getElementById('hourlyOverlay').classList.remove('show');
+    document.getElementById('hourlyBtn').classList.remove('active');
+  }
+});
+
+function buildHourlyPanel() {
+  const data = LINEUP[currentDay] || [];
+  const cfg = DAY_CONFIG[currentDay];
+
+  // All picks, sorted by start time
+  const picks = data
+    .filter(s => getTier(currentDay, setKey(s)) !== 'off')
+    .map(s => {
+      const startMin = parseTime(s.start, currentDay);
+      const endMin   = parseTime(s.end, currentDay);
+      const absStart = cfg.startMin + startMin;
+      // Hour label: actual clock hour
+      let hAbs = Math.floor(absStart / 60);
+      const minPart = absStart % 60;
+      // Normalise to 0-23
+      let h = hAbs % 24;
+      const ampm = h >= 12 ? 'AM' : 'AM';
+      const disp = h % 12 === 0 ? 12 : h % 12;
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      const hourLabel = `${disp} ${suffix}`;
+      return { ...s, startMin, endMin, absStart, hourLabel, hourKey: h };
+    })
+    .sort((a, b) => a.absStart - b.absStart);
+
+  document.getElementById('hourlySub').textContent =
+    `Day ${currentDay} · ${picks.length} pick${picks.length !== 1 ? 's' : ''}`;
+
+  const content = document.getElementById('hourlyContent');
+
+  if (!picks.length) {
+    content.innerHTML = `<div class="hour-empty">No picks yet for Day ${currentDay}.<br>Tap sets on the grid to add them.</div>`;
+    return;
+  }
+
+  // Group by hour label
+  const groups = {};
+  picks.forEach(s => {
+    if (!groups[s.hourLabel]) groups[s.hourLabel] = [];
+    groups[s.hourLabel].push(s);
+  });
+
+  let html = '';
+  let firstGroup = true;
+  Object.entries(groups).forEach(([hour, sets]) => {
+    html += `<div class="hour-header${firstGroup ? ' first' : ''}">${hour}</div>`;
+    firstGroup = false;
+    sets.forEach(s => {
+      const stage = STAGES.find(st => st.id === s.stage);
+      const tier = getTier(currentDay, setKey(s));
+      const icon = tier === 'must' ? '♥' : tier === 'want' ? '★' : tier === 'part' ? '◑' : '?';
+      const key = setKey(s);
+      const hasReminder = !!reminders[key];
+      html += `
+        <div class="list-item">
+          <div class="list-color" style="background:${stage?.color || '#fff'}"></div>
+          <div class="list-info">
+            <div class="list-artist">${s.artist}</div>
+            <div class="list-meta">${stage?.name || s.stage} · ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+          </div>
+          <div class="list-tier">${icon}</div>
+          <button class="list-bell ${hasReminder ? 'active' : ''}"
+            data-reminder-key="${key}"
+            onclick="toggleReminder('${key}', ${JSON.stringify(s).replace(/'/g, '&#39;')}, ${currentDay}); buildHourlyPanel();">
+            ${hasReminder ? '🔔' : '🔕'}
+          </button>
+        </div>`;
+    });
+  });
+
+  content.innerHTML = html;
+}
+
+['listBtn','fabListBtn'].forEach(id => { const el2 = document.getElementById(id); if(el2) el2.addEventListener('click', () => {
+  buildListPanel();
+  document.getElementById('listOverlay').classList.add('show');
+  document.getElementById('listBtn').classList.add('active');
+}); });
+document.getElementById('listOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('listOverlay')) {
+    document.getElementById('listOverlay').classList.remove('show');
+    document.getElementById('listBtn').classList.remove('active');
+  }
+});
+
+function buildListPanel() {
+  const data = LINEUP[currentDay] || [];
+  const picks = data
+    .filter(s => getTier(currentDay, setKey(s)) !== 'off')
+    .sort((a, b) => parseTime(a.start, currentDay) - parseTime(b.start, currentDay));
+
+  document.getElementById('listSub').textContent =
+    `Day ${currentDay} · ${picks.length} pick${picks.length !== 1 ? 's' : ''} · tap 🔔 to set a reminder`;
+
+  const content = document.getElementById('listContent');
+  if (!picks.length) {
+    content.innerHTML = `<div class="list-empty">No picks yet for Day ${currentDay}.<br>Tap sets on the grid to add them.</div>`;
+    return;
+  }
+
+  content.innerHTML = picks.map(s => {
+    const stage = STAGES.find(st => st.id === s.stage);
+    const tier = getTier(currentDay, setKey(s));
+    const icon = tier === 'must' ? '♥' : tier === 'want' ? '★' : tier === 'part' ? '◑' : '?';
+    const key = setKey(s);
+    const hasReminder = !!reminders[key];
+    return `
+      <div class="list-item">
+        <div class="list-color" style="background:${stage?.color || '#fff'}"></div>
+        <div class="list-info">
+          <div class="list-artist">${s.artist}</div>
+          <div class="list-meta">${stage?.name || s.stage} · ${fmtTime(s.start)}–${fmtTime(s.end)}</div>
+        </div>
+        <div class="list-tier">${icon}</div>
+        <button class="list-bell ${hasReminder ? 'active' : ''}"
+          data-reminder-key="${key}"
+          onclick="toggleReminder('${key}', ${JSON.stringify(s).replace(/'/g, '&#39;')}, ${currentDay}); buildListPanel();">
+          ${hasReminder ? '🔔' : '🔕'}
+        </button>
+      </div>`;
+  }).join('');
+}
+
+// ============================================
+// FRIEND COMPARE
+// ============================================
+let friendSelections = {};
+
+document.getElementById('compareBtn').addEventListener('click', () => {
+  document.getElementById('clearCompareBtn').style.display =
+    Object.keys(friendSelections).length ? 'block' : 'none';
+  document.getElementById('compareOverlay').classList.add('show');
+});
+document.getElementById('compareOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('compareOverlay'))
+    document.getElementById('compareOverlay').classList.remove('show');
+});
+
+function loadFriendPicks() {
+  const raw = document.getElementById('compareInput').value.trim();
+  try {
+    const hash = raw.includes('#share=') ? raw.split('#share=')[1] : raw;
+    const decoded = JSON.parse(decodeURIComponent(atob(hash)));
+    friendSelections = decoded.selections || {};
+    applyFriendOverlay();
+    document.getElementById('compareOverlay').classList.remove('show');
+    document.getElementById('compareInput').value = '';
+    showToast(`👥 Friend's picks loaded`);
+    document.getElementById('clearCompareBtn').style.display = 'block';
+  } catch(e) {
+    showToast('Could not read that link — try copying it again');
+  }
+}
+
+function clearFriendPicks() {
+  friendSelections = {};
+  applyFriendOverlay();
+  document.getElementById('compareOverlay').classList.remove('show');
+  document.getElementById('clearCompareBtn').style.display = 'none';
+  showToast('Friend picks cleared');
+}
+
+function applyFriendOverlay() {
+  document.querySelectorAll('.set').forEach(el => {
+    el.classList.remove('friend-pick', 'friend-match');
+    el.querySelector('.friend-dot')?.remove();
+  });
+  if (!Object.keys(friendSelections).length) return;
+
+  const data = LINEUP[currentDay] || [];
+  data.forEach(s => {
+    const key = setKey(s);
+    const myTier = getTier(currentDay, key);
+    const friendTier = (friendSelections[currentDay] && friendSelections[currentDay][key]);
+    if (!friendTier || friendTier === 'off') return;
+
+    const el = document.querySelector(`[data-key="${key}"]`);
+    if (!el) return;
+
+    const isBothPicked = myTier !== 'off';
+    el.classList.add(isBothPicked ? 'friend-match' : 'friend-pick');
+    const dot = document.createElement('span');
+    dot.className = 'friend-dot';
+    dot.textContent = isBothPicked ? '👥' : '👤';
+    el.appendChild(dot);
+  });
+}
+
+// ============================================
+// SHORT URL via TinyURL
+// ============================================
+async function copyShortURL() {
+  const payload = { selections, notes, day: currentDay };
+  const hash = btoa(encodeURIComponent(JSON.stringify(payload)));
+  const longURL = `${location.origin}${location.pathname}#share=${hash}`;
+  showToast('Generating short link…');
+  try {
+    const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longURL)}`);
+    const short = await res.text();
+    if (short.startsWith('http')) {
+      await navigator.clipboard.writeText(short).catch(() => prompt('Copy your short link:', short));
+      showToast(`🔗 Copied: ${short}`);
+    } else { throw new Error(); }
+  } catch(e) {
+    // Fallback to full link
+    await navigator.clipboard.writeText(longURL).catch(() => prompt('Copy link:', longURL));
+    showToast('Copied full link (TinyURL unavailable)');
+  }
+}
+
+// ============================================
+// INIT
+// ============================================
+loadState();
+renderGrid(currentDay);
+updateUI();
+startNowLine(currentDay);
+scheduleAllReminders();
+applyFriendOverlay();
+</script>
+
+<div class="toast" id="toast"></div>
+<div class="scroll-hint">⇆ Scroll to see all 14 stages</div>
